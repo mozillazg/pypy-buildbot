@@ -1,143 +1,30 @@
 # -*- encoding: utf-8 -*-
+import py
+import pytest
+from bitbucket_hook import hook, scm, mail, irc
 
-from bitbucket_hook.hook import BitbucketHookHandler, getpaths
+#XXX
+hook.app.config['USE_COLOR_CODES'] = False
 
-class BaseHandler(BitbucketHookHandler):
-
-    def __init__(self):
-        self.mails = []
-
-    def send(self, from_, to, subject, body, test=False):
-        self.mails.append((from_, to, subject, body))
-
-
-def test_non_ascii_encoding_guess_utf8():
-    class MyHandler(BaseHandler):
-        def _hgexe(self, argv):
-            return u'späm'.encode('utf-8'), '', 0
-    #
-    handler = MyHandler()
-    stdout = handler.hg('foobar')
-    assert type(stdout) is unicode
-    assert stdout == u'späm'
-
-def test_non_ascii_encoding_invalid_utf8():
-    class MyHandler(BaseHandler):
-        def _hgexe(self, argv):
-            return '\xe4aa', '', 0 # invalid utf-8 string
-    #
-    handler = MyHandler()
-    stdout = handler.hg('foobar')
-    assert type(stdout) is unicode
-    assert stdout == u'\ufffdaa'
 
 def test_sort_commits():
-    class MyHandler(BaseHandler):
-        def __init__(self):
-            self.sent_commits = []
-        def send_diff_for_commit(self, commit, test=False):
-            self.sent_commits.append(commit['node'])
     #
-    handler = MyHandler()
-    handler.payload = {
-        'commits': [{'revision': 43, 'node': 'second'},
-                    {'revision': 42, 'node': 'first'}]
-        }
-    handler.handle_diff_email()
-    assert handler.sent_commits == ['first', 'second']
+    seen_nodes = set()
+    payload = {
+        'commits': [
+            {'revision': 43, 'node': 'second', 'raw_node': 'first'},
+            {'revision': 42, 'node': 'first', 'raw_node': 'second'},
+        ],
+    }
+    commits = hook.get_commits(payload, seen_nodes)
+    commits = [x['node'] for x in commits]
 
-def test_getpaths():
-    d = dict
-
-    barefile = [d(file='file')]
-    distinct = [d(file='path1/file1'), d(file='path2/file2'),
-                d(file='path3/file')]
-    shared = [d(file='path/file1'), d(file='path/file2'),
-              d(file='path/file')]
-
-    deepfile = [d(file='a/long/path/to/deepfile.py')]
-    slashesfile = [d(file='/slashesfile/')]
-    slashleft = [d(file='/slashleft')]
-    slashright = [d(file='slashright/')]
+    assert commits == ['first', 'second']
 
 
-    nocommon = distinct + [d(file='path4/file')]
-    nocommonplusroot = distinct + barefile
+LONG_MESSAGE = u'This is a test with a long message: ' + 'x' * 1000
+LONG_CUT = LONG_MESSAGE[:160 - 29]
 
-    common = [d(file='some/path/to/file'), d(file='some/path/to/deeper/file'),
-              d(file='some/path/to/anotherfile'), d(file='some/path/to/afile')]
-    commonplusroot = shared + barefile
-
-    empty = d(file='')
-    nocommonplusempty = distinct + [empty]
-    commonplusempty = shared + [empty]
-    nocommonplusslash = distinct + [d(file='path4/dir/')]
-    commonplusslash = shared + [d(file='path/dir/')]
-
-    pypydoubleslash = [d(file='pypy/jit/metainterp/opt/u.py'),
-                       d(file='pypy/jit/metainterp/test/test_c.py'),
-                       d(file='pypy/jit/metainterp/test/test_o.py')]
-
-    pypyempty = [d(file='pypy/rlib/rdtoa.py'),
-                 d(file='pypy/rlib/test/test_rdtoa.py')]
-
-    nothing = ('', '')
-
-    # (input, expected output) for listfiles=False
-    files_expected = [([], nothing),
-                      ([empty], nothing),
-                      ([empty, empty], nothing),
-                      (barefile, ('file', '')),
-                      (deepfile, ('a/long/path/to/deepfile.py', '')),
-                      (slashesfile, ('/slashesfile/', '')),
-                      (slashleft, ('/slashleft', '')),
-                      (slashright, ('slashright/', '')),
-                      (nocommon, nothing),
-                      (nocommonplusroot, nothing),
-                      (nocommonplusempty, nothing),
-                      (common, ('some/path/to/', '')),
-                      (commonplusroot, nothing),
-                      (commonplusempty, nothing),
-                      (nocommonplusslash, nothing),
-                      (commonplusslash, ('path/', '')),
-                      (pypydoubleslash, ('pypy/jit/metainterp/', '')),
-                      (pypyempty, ('pypy/rlib/', '')),
-                      ]
-
-    for f, wanted in files_expected:
-        assert getpaths(f) == wanted
-
-    # (input, expected output) for listfiles=True
-    files_expected = [([], nothing),
-                      ([empty], nothing),
-                      ([empty, empty], nothing),
-                      (barefile, ('file', '')),
-                      (deepfile, ('a/long/path/to/deepfile.py', '')),
-                      (slashesfile, ('/slashesfile/', '')),
-                      (slashleft, ('/slashleft', '')),
-                      (slashright, ('slashright/', '')),
-                      (nocommon, ('', ' M(file1, file2, file, file)')),
-                      (nocommonplusroot, ('', ' M(file1, file2, file, file)')),
-                      (nocommonplusempty, ('',' M(file1, file2, file)')),
-                      (common, ('some/path/to/',
-                                ' M(file, file, anotherfile, afile)')),
-                      (commonplusroot, ('', ' M(file1, file2, file, file)')),
-                      (commonplusempty, ('',' M(file1, file2, file)')),
-                      (nocommonplusslash, ('',' M(file1, file2, file)')),
-                      (commonplusslash, ('path/',' M(file1, file2, file)')),
-                      (pypydoubleslash, ('pypy/jit/metainterp/',
-                                         ' M(u.py, test_c.py, test_o.py)')),
-                      (pypyempty, ('pypy/rlib/',
-                                   ' M(rdtoa.py, test_rdtoa.py)')),
-                      ]
-
-    for f, wanted in files_expected:
-        assert getpaths(f, listfiles=True) == wanted
-
-
-
-LONG_MESSAGE = u'This is a test with a long message: ' + 'x'*1000
-LONG_CUT = LONG_MESSAGE[:160-29]
 
 def irc_cases(payload=None):
 
@@ -154,12 +41,12 @@ def irc_cases(payload=None):
                                   d(file='my/file3')]
     single_file_deep = [d(file='path/to/single')]
 
-    cases = [(no_file,  ''), # No diff
-             (single_file,'single'), # Single file
+    cases = [(no_file,  ''),  # No diff
+             (single_file, 'single'),  # Single file
              (multiple_files,   ''),  # No common prefix
-             (multiple_files_subdir, 'path/'), # Common prefix
-             (multiple_files_subdir_root, ''), # No common subdir, file in root
-             (single_file_deep,'path/to/single') # Single file in deep path
+             (multiple_files_subdir, 'path/'),  # Common prefix
+             (multiple_files_subdir_root, ''),  # No common subdir file in root
+             (single_file_deep, 'path/to/single'),  # Single file in deep path
             ]
 
     author = u'antocuni'
@@ -171,7 +58,7 @@ def irc_cases(payload=None):
 
     for i, (case, snippet) in enumerate(cases):
         rev = 44 + i
-        node = chr(97+i) + 'xxyyy'
+        node = chr(97 + i) + 'xxyyy'
         raw_node = node * 2
         expected.append(expected_template % (node, snippet, LONG_CUT))
         commits.append(d(revision=rev, files=case, author=author,
@@ -181,51 +68,64 @@ def irc_cases(payload=None):
     return payload, expected
 
 
-def test_irc_message():
-    class MyHandler(BaseHandler):
-        USE_COLOR_CODES = False
-        def __init__(self):
-            self.messages = []
-        def send_irc_message(self, message, test=False):
-            self.messages.append(message)
+def test_irc_message(monkeypatch, messages):
+    payload = {
+        'repository': {
+            'owner': 'pypy',
+            'name': 'pypy',
+            },
+        'commits': [
+            {
+                'revision': 42,
+                'branch': u'default',
+                'author': u'antocuni',
+                'message': u'this is a test',
+                'node': 'abcdef',
+                'raw_node': 'abcdef',
+            },
+            {
+                'revision': 43,
+                'author': u'antocuni',
+                'branch': u'mybranch',
+                'message': LONG_MESSAGE,
+                'node': 'xxxyyy',
+                'raw_node': 'xxxyyy',
+            },
+        ]
+    }
 
-    handler = MyHandler()
-    handler.payload = {
-        'commits': [{'revision': 42,
-                     'branch': u'default',
-                     'author': u'antocuni',
-                     'message': u'this is a test',
-                     'node': 'abcdef'
-                     },
-                    {'revision': 43,
-                     'author': u'antocuni',
-                     'branch': u'mybranch',
-                     'message': LONG_MESSAGE,
-                     'node': 'xxxyyy'
-                     }
-                    ]}
+    payload, expected = irc_cases(payload)
+    commits = payload['commits']
+    irc.handle_commit(payload, commits[0])
+    irc.handle_commit(payload, commits[1])
 
-    handler.payload, expected = irc_cases(handler.payload)
-    handler.handle_irc_message()
-
-    msg1, msg2 = handler.messages[:2]
+    msg1, msg2 = messages[:2]
 
     assert msg1 == 'antocuni default abcdef /: this is a test'
     x = 'antocuni mybranch xxxyyy /: %s...' % LONG_CUT
     assert msg2 == x
 
-    for got, wanted in zip(handler.messages[2:], expected):
+    for got, wanted in zip(messages[2:], expected):
         assert got == wanted
 
-def noop(*args, **kwargs): pass
+
+def noop(*args, **kwargs):
+    pass
+
+
 class mock:
     __init__ = noop
-    def communicate(*args, **kwargs): return '1', 2
-    def wait(*args, **kwargs): return 0
+
+    def communicate(*args, **kwargs):
+        return '1', 2
+
+    def wait(*args, **kwargs):
+        return 0
+
     sendmail = noop
 
-def test_handle():
-    handler = BitbucketHookHandler()
+
+def test_handle(monkeypatch):
     commits, _ = irc_cases()
     test_payload = {u'repository': {u'absolute_url': '',
                                     u'name': u'test',
@@ -235,14 +135,57 @@ def test_handle():
                     u'user': u'antocuni',
                     'commits': commits['commits']}
 
-    handler.call_subprocess = noop
-    handler.Popen = mock
-    handler.SMTP = mock
+    monkeypatch.setattr(scm, 'Popen', mock)
+    monkeypatch.setattr(irc.subprocess, 'call', noop)
+    monkeypatch.setattr(mail, 'SMTP', mock)
 
-    handler.handle(test_payload)
-    handler.handle(test_payload, test=True)
+    hook.handle(test_payload)
+    hook.handle(test_payload, test=True)
 
-    handler.LISTFILES = True
-    handler.handle(test_payload)
-    handler.handle(test_payload, test=True)
+    hook.app.config['LISTFILES'] = True
+    hook.handle(test_payload)
+    hook.handle(test_payload, test=True)
+
+
+def test_handle_unknown(monkeypatch):
+    hgcalls = []
+    def hgraise(*args):
+        hgcalls.append(args)
+
+    monkeypatch.setattr(scm, 'hg', hgraise)
+    hook.handle({
+        u'repository': {
+            u'absolute_url': '/foobar/myrepo',
+            u'owner': 'foobar',
+        },
+    })
+    assert hgcalls == []
+
+    hook.handle({
+        u'repository': {
+            u'absolute_url': '/pypy/myrepo',
+            u'owner': 'pypy'
+        },
+        u'commits': [],
+    })
+    assert hgcalls[0][:2] == ('clone', 'http://bitbucket.org/pypy/myrepo',)
+    local_repo = hgcalls[0][-1]
+    assert hgcalls[1] == ('pull', '-R', local_repo)
+
+
+def test_ignore_duplicate_commits(monkeypatch, mails, messages):
+    commits, _ = irc_cases()
+    payload = {u'repository': {u'absolute_url': '',
+                               u'name': u'test',
+                               u'owner': u'antocuni',
+                               u'slug': u'test',
+                               u'website': u''},
+               u'user': u'antocuni',
+               'commits': commits['commits']}
+    seen_nodes = set()
+    commits_listed = list(hook.get_commits(payload, seen_nodes))
+    commits_again = list(hook.get_commits(payload, seen_nodes))
+    num_commits = len(commits['commits'])
+    assert len(commits_listed) == num_commits
+    assert not commits_again
 

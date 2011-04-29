@@ -7,57 +7,81 @@ The idea is that the buildmaster user runs it inside a screen session on
 codespeak.
 """
 
-import time
-import BaseHTTPServer
 import json
-import cgi
 import traceback
 import pprint
 import sys
+import flask
+import py
 
-from hook import BitbucketHookHandler
 
-HOST_NAME = 'codespeak.net'
-PORT_NUMBER = 9237
+app = flask.Flask(__name__)
 
-class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
-    def do_GET(self):
-        """Respond to a GET request."""
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write("""
-            <html>
-                <p>This is the pypy bitbucket hook. Use the following form only for testing</p>
-                <form method=post>
-                    payload: <input name=payload> <br>
-                    submit: <input type=submit>
-                </form>
-            </html>
-        """)
 
-    def do_POST(self):
-        length = int(self.headers['Content-Length'])
-        query_string = self.rfile.read(length)
-        data = dict(cgi.parse_qsl(query_string))
-        payload = json.loads(data['payload'])
-        handler = BitbucketHookHandler()
-        try:
-            handler.handle(payload)
-        except:
-            traceback.print_exc()
-            print >> sys.stderr, 'payload:'
-            pprint.pprint(payload, sys.stderr)
-            print >> sys.stderr
+@app.route('/', methods=['GET'])
+def test_form():
+    """Respond to a GET request."""
+    return """
+        <html>
+            <p>
+                This is the pypy bitbucket hook.
+                Use the following form only for testing
+            </p>
+            <form method=post>
+                payload: <input name=payload> <br>
+                submit: <input type=submit>
+            </form>
+        </html>
+    """
 
-if __name__ == '__main__':
-    server_class = BaseHTTPServer.HTTPServer
-    httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
-    print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
+
+@app.route('/', methods=['POST'])
+def handle_payload():
+    payload = json.loads(flask.request.form['payload'])
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
+        from . import hook
+        hook.handle(payload, test=app.testing)
+    except:
+        traceback.print_exc()
+        print >> sys.stderr, 'payload:'
+        pprint.pprint(payload, sys.stderr)
+        print >> sys.stderr
+        raise
+    return 'ok'
+
+
+class DefaultConfig(object):
+    LOCAL_REPOS = py.path.local(__file__).dirpath('repos')
+    REMOTE_BASE = 'http://bitbucket.org'
+    USE_COLOR_CODES = True
+    LISTFILES = False
+    #
+    DEFAULT_USER = 'pypy'
+    DEFAULT_REPO = 'pypy'
+
+
+class CodeSpeakConfig(DefaultConfig):
+    SMTP_SERVER = 'localhost'
+    SMTP_PORT = 25
+    ADDRESS = 'pypy-svn@codespeak.net'
+    #
+    CHANNEL = '#pypy'
+    BOT = '/svn/hooks/commit-bot/message'
+
+
+class ViperConfig(DefaultConfig):
+    SMTP_SERVER = "out.alice.it"
+    SMTP_PORT = 25
+    ADDRESS = 'anto.cuni@gmail.com'
+    #
+    CHANNEL = '#test'
+    BOT = '/tmp/commit-bot/message'
+
+
+if py.std.socket.gethostname() == 'viper':
+    # for debugging, antocuni's settings
+    app.config.from_object(ViperConfig)
+else:
+    # real settings, (they works on codespeak at least)
+    app.config.from_object(CodeSpeakConfig)
