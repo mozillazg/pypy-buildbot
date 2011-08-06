@@ -640,7 +640,7 @@ def encode_rev_for_ordering(rev):
         i = rev.index(':')
         return (2, int(rev[:i]), rev)
     # unknown
-    return (3, rev)
+    return (0, rev)
 
 HEAD_ELEMENTS = [
     '<title>%(title)s</title>',
@@ -656,13 +656,18 @@ class Summary(HtmlResource):
         self.categories = categories
         self.branch_order_prefixes = branch_order_prefixes
 
-    def content(self, request):
-        old_head_elements = request.site.buildbot_service.head_elements
+    def content(self, request, *args, **kw):
+        unset = old_head_elements = object()
+        try:
+            old_head_elements = request.site.buildbot_service.head_elements
+        except AttributeError:
+            pass
         self.head_elements = HEAD_ELEMENTS
         try:
-            return HtmlResource.content(self, request)
+            return HtmlResource.content(self, request, *args, **kw)
         finally:
-            request.site.buildbot_service.head_elements = old_head_elements
+            if old_head_elements is not unset:
+                request.site.buildbot_service.head_elements = old_head_elements
 
     def getTitle(self, request):
         status = self.getStatus(request)

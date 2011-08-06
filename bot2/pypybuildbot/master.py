@@ -57,6 +57,7 @@ def my_body(self, req):
             url,
             data[i:])
     return data
+
 _previous_body = StatusResourceBuilder.body
 if _previous_body.__name__ == 'body':
     StatusResourceBuilder.body = my_body
