@@ -1,38 +1,13 @@
+import getpass
 from buildbot.scheduler import Nightly
 from buildbot.buildslave import BuildSlave
 from buildbot.status.html import WebStatus
 from buildbot.process.builder import Builder
 from pypybuildbot.pypylist import PyPyList
-
-# I really wanted to pass logPath to Site
-from twisted.web.server import Site
-class LoggingSite(Site):
-    def __init__(self, *a, **kw):
-        Site.__init__(self, logPath='httpd.log', *a, **kw)
-from twisted.web import server
-if server.Site.__name__ == 'Site':
-    server.Site = LoggingSite
-# So I did.
-
-
-# The button Resubmit Build is quite confusing, so disable it
-from buildbot.status.web.build import StatusResourceBuild
-StatusResourceBuild_init = StatusResourceBuild.__init__
-def my_init(self, build_status, build_control, builder_control):
-    StatusResourceBuild_init(self, build_status, build_control, None)
-if StatusResourceBuild.__init__.__name__ == '__init__':
-    StatusResourceBuild.__init__ = my_init
-# Disabled.
-
-# Disable pinging, as it seems to deadlock the client
-from buildbot.status.web.builder import StatusResourceBuilder
-def my_ping(self, req):
-    raise Exception("pinging is disabled, as it seems to deadlock clients")
-if StatusResourceBuilder.ping.__name__ == 'ping':
-    StatusResourceBuilder.ping = my_ping
-# Disabled.
+from pypybuildbot.ircbot import IRC # side effects
 
 # Forbid "force build" with empty user name
+from buildbot.status.web.builder import StatusResourceBuilder
 def my_force(self, req):
     name = req.args.get("username", [""])[0]
     assert name, "Please write your name in the corresponding field."
@@ -42,57 +17,19 @@ if _previous_force.__name__ == 'force':
     StatusResourceBuilder.force = my_force
 # Done
 
-# Add a link from the builder page to the summary page
-def my_body(self, req):
-    data = _previous_body(self, req)
-    MARKER = 'waterfall</a>)'
-    i = data.find(MARKER)
-    if i >= 0:
-        from twisted.web import html
-        i += len(MARKER)
-        b = self.builder_status
-        url = self.path_to_root(req)+"summary?builder="+html.escape(b.getName())
-        data = '%s&nbsp;&nbsp;&nbsp;(<a href="%s">view in summary</a>)%s' % (
-            data[:i],
-            url,
-            data[i:])
-    return data
-_previous_body = StatusResourceBuilder.body
-if _previous_body.__name__ == 'body':
-    StatusResourceBuilder.body = my_body
-# Done
-
-# Add a similar link from the build page to the summary page
-def my_body_2(self, req):
-    data = _previous_body_2(self, req)
-    MARKER1 = '<h2>Results'
-    MARKER2 = '<h2>SourceStamp'
-    i1 = data.find(MARKER1)
-    i2 = data.find(MARKER2)
-    if i1 >= 0 and i2 >= 0:
-        from twisted.web import html
-        b = self.build_status
-        ss = b.getSourceStamp()
-        branch = ss.branch or '<trunk>'
-        builder_name = b.getBuilder().getName()
-        url = (self.path_to_root(req) +
-               "summary?builder=" + html.escape(builder_name) +
-               "&branch=" + html.escape(branch))
-        data = '%s&nbsp;&nbsp;&nbsp;(<a href="%s">view in summary</a>)\n\n%s'% (
-            data[:i2],
-            url,
-            data[i2:])
-    return data
-_previous_body_2 = StatusResourceBuild.body
-if _previous_body_2.__name__ == 'body':
-    StatusResourceBuild.body = my_body_2
-
-# Picking a random slave is not really what we want;
-# let's pick the first available one instead.
-Builder.CHOOSE_SLAVES_RANDOMLY = False
-
+if getpass.getuser() == 'antocuni':
+    channel = '#buildbot-test'
+else:
+    channel = '#pypy'
 
 status = WebStatus(httpPortNumber, allowForce=True)
+ircbot = IRC(host="irc.freenode.org",
+             nick="bbot2",
+             channels=[channel],
+             notify_events={
+                 'started': 1,
+                 'finished': 1,
+             })
 
 # pypy test summary page
 summary = load('pypybuildbot.summary')
@@ -254,7 +191,7 @@ BuildmasterConfig = {
             JITBENCH,                  # on tannit32, uses 1 core (in part exclusively)
             JITBENCH64,                # on tannit64, uses 1 core (in part exclusively)
             MACOSX32,                  # on minime
-            ], hour=0, minute=0),
+            ], branch=None, hour=0, minute=0),
         #
         # then, we schedule all the rest. The locks will take care not to run
         # all of them in parallel
@@ -271,10 +208,10 @@ BuildmasterConfig = {
             JITWIN32,                  # on bigboard
             STACKLESSAPPLVLFREEBSD64,  # on headless
             JITMACOSX64,               # on mvt's machine
-            ], hour=3, minute=0)
+            ], branch=None, hour=3, minute=0)
     ],
 
-    'status': [status],
+    'status': [status, ircbot],
 
     'slaves': [BuildSlave(name, password)
                for (name, password)
@@ -287,11 +224,7 @@ BuildmasterConfig = {
                    "factory": pypyOwnTestFactory,
                    "category": 'linux32',
                    # this build needs 4 CPUs
-                   "locks": [TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             ],
+                   "locks": [TannitCPU.access('exclusive')],
                   },
                   {"name": LINUX64,
                    "slavenames": ["tannit64"],
@@ -299,23 +232,7 @@ BuildmasterConfig = {
                    "factory": pypyOwnTestFactory,
                    "category": 'linux64',
                    # this build needs 4 CPUs
-                   "locks": [TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             TannitCPU.access('counting'),
-                             ],
-                  },
-                  {"name": MACOSX32,
-                   "slavenames": ["minime"],
-                   "builddir": MACOSX32,
-                   "factory": pypyOwnTestFactory,
-                   "category": 'mac32'
-                  },
-                  {"name": WIN32,
-                   "slavenames": ["bigboard"],
-                   "builddir": WIN32,
-                   "factory": pypyOwnTestFactoryWin,
-                   "category": 'win32'
+                   "locks": [TannitCPU.access('exclusive')],
                   },
                   {"name": APPLVLLINUX32,
                    "slavenames": ["bigdogvm1", "tannit32"],
@@ -345,18 +262,6 @@ BuildmasterConfig = {
                    "category": 'linux32',
                    "locks": [TannitCPU.access('counting')],
                   },
-                  {"name": APPLVLWIN32,
-                   "slavenames": ["bigboard"],
-                   "builddir": APPLVLWIN32,
-                   "factory": pypyTranslatedAppLevelTestFactoryWin,
-                   "category": "win32"
-                  },
-                  {"name" : STACKLESSAPPLVLFREEBSD64,
-                   "slavenames": ['headless'],
-                   'builddir' : STACKLESSAPPLVLFREEBSD64,
-                   'factory' : pypyStacklessTranslatedAppLevelTestFactory,
-                   "category": 'freebsd64-stackless'
-                   },
                   {"name" : JITLINUX32,
                    "slavenames": ["bigdogvm1", "tannit32"],
                    'builddir' : JITLINUX32,
@@ -371,18 +276,6 @@ BuildmasterConfig = {
                    'category': 'linux64',
                    "locks": [TannitCPU.access('counting')],
                   },
-                  {"name" : JITMACOSX64,
-                   "slavenames": ["macmini-mvt", "xerxes"],
-                   'builddir' : JITMACOSX64,
-                   'factory' : pypyJITTranslatedTestFactoryOSX64,
-                   'category' : 'mac64',
-                   },
-                  {"name" : JITWIN32,
-                   "slavenames": ["bigboard"],
-                   'builddir' : JITWIN32,
-                   'factory' : pypyJITTranslatedTestFactoryWin,
-                   'category' : 'win32',
-                   },
                   {"name": JITONLYLINUX32,
                    "slavenames": ["tannit32", "bigdogvm1"],
                    "builddir": JITONLYLINUX32,
@@ -403,6 +296,42 @@ BuildmasterConfig = {
                    "factory": pypyJITBenchmarkFactory64,
                    "category": "benchmark-run",
                    # the locks are acquired with fine grain inside the build
+                   },
+                  {"name": MACOSX32,
+                   "slavenames": ["minime"],
+                   "builddir": MACOSX32,
+                   "factory": pypyOwnTestFactory,
+                   "category": 'mac32'
+                  },
+                  {"name" : JITMACOSX64,
+                   "slavenames": ["macmini-mvt", "xerxes"],
+                   'builddir' : JITMACOSX64,
+                   'factory' : pypyJITTranslatedTestFactoryOSX64,
+                   'category' : 'mac64',
+                   },
+                  {"name": WIN32,
+                   "slavenames": ["bigboard"],
+                   "builddir": WIN32,
+                   "factory": pypyOwnTestFactoryWin,
+                   "category": 'win32'
+                  },
+                  {"name": APPLVLWIN32,
+                   "slavenames": ["bigboard"],
+                   "builddir": APPLVLWIN32,
+                   "factory": pypyTranslatedAppLevelTestFactoryWin,
+                   "category": "win32"
+                  },
+                  {"name" : JITWIN32,
+                   "slavenames": ["bigboard"],
+                   'builddir' : JITWIN32,
+                   'factory' : pypyJITTranslatedTestFactoryWin,
+                   'category' : 'win32',
+                   },
+                  {"name" : STACKLESSAPPLVLFREEBSD64,
+                   "slavenames": ['headless'],
+                   'builddir' : STACKLESSAPPLVLFREEBSD64,
+                   'factory' : pypyStacklessTranslatedAppLevelTestFactory,
+                   "category": 'freebsd64-stackless'
                    },
                 ],
 
