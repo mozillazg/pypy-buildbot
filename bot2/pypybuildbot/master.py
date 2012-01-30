@@ -132,10 +132,12 @@ pypy_OjitTranslatedTestFactory = pypybuilds.Translated(
 pypyJITBenchmarkFactory_tannit = pypybuilds.JITBenchmark()
 pypyJITBenchmarkFactory64_tannit = pypybuilds.JITBenchmark(platform='linux64',
                                                            postfix='-64')
-
 pypyJITBenchmarkFactory64_speed = pypybuilds.JITBenchmark(platform='linux64',
                                                           postfix='-64',
                                                           host='speed_python')
+
+cPython27BenchmarkFactory64 = pypybuilds.CPythonBenchmark('2.7',
+                                                          platform='linux64')
 
 
 LINUX32 = "own-linux-x86-32"
@@ -160,7 +162,8 @@ JITFREEBSD64 = 'pypy-c-jit-freebsd-7-x86-64'
 JITONLYLINUX32 = "jitonly-own-linux-x86-32"
 JITBENCH = "jit-benchmark-linux-x86-32"
 JITBENCH64 = "jit-benchmark-linux-x86-64"
-JITBENCH64_2 = "jit-benchmark-linux-x86-64-2"
+JITBENCH64_2 = 'jit-benchmark-linux-x86-64-2'
+CPYTHON_64 = "cpython-2-benchmark-x86-64"
 
 
 BuildmasterConfig = {
@@ -208,6 +211,7 @@ BuildmasterConfig = {
             JITBENCH,                  # on tannit32, uses 1 core (in part exclusively)
             JITBENCH64,                # on tannit64, uses 1 core (in part exclusively)
             JITBENCH64_2,              # on speed.python.org, uses 1 core (in part exclusively)
+            CPYTHON_64,                # on speed.python.org, uses 1 core (in part exclusively)
             MACOSX32,                  # on minime
             ], branch=None, hour=0, minute=0),
         #
@@ -316,6 +320,13 @@ BuildmasterConfig = {
                    "slavenames": ["speed-python-64"],
                    "builddir": JITBENCH64_2,
                    "factory": pypyJITBenchmarkFactory64_speed,
+                   "category": "benchmark-run",
+                   # the locks are acquired with fine grain inside the build
+                   },
+                  {"name": CPYTHON_64,
+                   "slavenames": ["speed-python-64"],
+                   "builddir": CPYTHON_64,
+                   "factory": cPython27BenchmarkFactory64,
                    "category": "benchmark-run",
                    # the locks are acquired with fine grain inside the build
                    },

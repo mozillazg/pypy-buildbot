@@ -1,6 +1,5 @@
 from buildbot.process import factory
-from buildbot.steps import source, shell, transfer, master
-from buildbot.status.builder import SUCCESS
+from buildbot.steps import shell, transfer
 from buildbot.process.properties import WithProperties
 from buildbot import locks
 from pypybuildbot.util import symlink_force
@@ -29,6 +28,7 @@ class ShellCmd(shell.ShellCommand):
         if cmd is not None and cmd.rc == -1:
             return self.describe(True) + ['aborted']
         return shell.ShellCommand.getText(self, cmd, results)
+
 
 class PyPyUpload(transfer.FileUpload):
     parms = transfer.FileUpload.parms + ['basename']
@@ -138,18 +138,32 @@ class PytestCmd(ShellCmd):
             d[key] = summary
         builder.saveYourself()
 
-# ________________________________________________________________
+
+# _______________________________________________________________
 
 class UpdateCheckout(ShellCmd):
     description = 'hg update'
     command = 'UNKNOWN'
 
+    def __init__(self, workdir=None, haltOnFailure=True, force_branch=None,
+                 **kwargs):
+        ShellCmd.__init__(self, workdir=workdir, haltOnFailure=haltOnFailure,
+                          **kwargs)
+        self.force_branch = force_branch
+        self.addFactoryArguments(force_branch=force_branch)
+
     def start(self):
-        properties = self.build.getProperties()
-        branch = properties['branch']
-        command = ["hg", "update", "--clean", "-r", branch or 'default']
+        if self.force_branch is not None:
+            branch = self.force_branch
+            # Note: We could add a warning to the output if we
+            # ignore the branch set by the user.
+        else:
+            properties = self.build.getProperties()
+            branch = properties['branch'] or 'default'
+        command = ["hg", "update", "--clean", "-r", branch]
         self.setCommand(command)
         ShellCmd.start(self)
+
 
 class CheckGotRevision(ShellCmd):
     description = 'got_revision'
@@ -162,21 +176,25 @@ class CheckGotRevision(ShellCmd):
             # '|' in the command-line, because it doesn't work on Windows
             num = got_revision.find(':')
             if num > 0:
-                got_revision = got_revision[:num+13]
+                got_revision = got_revision[:num + 13]
             #
             final_file_name = got_revision.replace(':', '-')
             # ':' should not be part of filenames --- too many issues
-            self.build.setProperty('got_revision', got_revision, 'got_revision')
-            self.build.setProperty('final_file_name', final_file_name, 'got_revision')
+            self.build.setProperty('got_revision', got_revision,
+                                   'got_revision')
+            self.build.setProperty('final_file_name', final_file_name,
+                                   'got_revision')
 
-def update_hg(platform, factory, repourl, workdir, use_branch):
+
+def update_hg(platform, factory, repourl, workdir, use_branch,
+              force_branch=None):
     if platform == 'win32':
         command = "if not exist .hg rmdir /q /s ."
     else:
         command = "if [ ! -d .hg ]; then rm -fr * .[a-z]*; fi"
     factory.addStep(ShellCmd(description="rmdir?",
-                             command = command,
-                             workdir = workdir,
+                             command=command,
+                             workdir=workdir,
                              haltOnFailure=False))
     #
     if platform == "win32":
@@ -185,36 +203,41 @@ def update_hg(platform, factory, repourl, workdir, use_branch):
         command = "if [ ! -d .hg ]; then %s; fi"
     command = command % ("hg clone -U " + repourl + " .")
     factory.addStep(ShellCmd(description="hg clone",
-                             command = command,
-                             workdir = workdir,
+                             command=command,
+                             workdir=workdir,
                              haltOnFailure=True))
     #
-    factory.addStep(ShellCmd(description="hg purge",
-                             command = "hg --config extensions.purge= purge --all",
-                             workdir = workdir,
-                             haltOnFailure=True))
+    factory.addStep(
+        ShellCmd(description="hg purge",
+                 command="hg --config extensions.purge=purge --all",
+                 workdir=workdir,
+                 haltOnFailure=True))
     #
     factory.addStep(ShellCmd(description="hg pull",
-                             command = "hg pull",
-                             workdir = workdir))
+                             command="hg pull",
+                             workdir=workdir))
     #
-    if use_branch:
-        factory.addStep(UpdateCheckout(workdir = workdir,
-                                       haltOnFailure=True))
+    if use_branch or force_branch:
+        factory.addStep(UpdateCheckout(workdir=workdir,
+                                       haltOnFailure=True,
+                                       force_branch=force_branch))
     else:
         factory.addStep(ShellCmd(description="hg update",
-                                 command = "hg update --clean",
-                                 workdir = workdir))
+                                 command="hg update --clean",
+                                 workdir=workdir))
 
-def setup_steps(platform, factory, workdir=None):
+
+def setup_steps(platform, factory, workdir=None,
+                repourl='https://bitbucket.org/pypy/pypy/',
+                force_branch=None):
     # XXX: this assumes that 'hg' is in the path
     import getpass
-    repourl = 'https://bitbucket.org/pypy/pypy/'
     if getpass.getuser() == 'antocuni':
         # for debugging
         repourl = '/home/antocuni/pypy/default'
     #
-    update_hg(platform, factory, repourl, workdir, use_branch=True)
+    update_hg(platform, factory, repourl, workdir, use_branch=True,
+              force_branch=force_branch)
     #
     factory.addStep(CheckGotRevision(workdir=workdir))
 
@@ -235,9 +258,10 @@ class Own(factory.BuildFactory):
                      "--root=pypy", "--timeout=10800"
                      ] + ["--config=%s" % cfg for cfg in extra_cfgs],
             logfiles={'pytestLog': 'testrun.log'},
-            timeout = 4000,
+            timeout=4000,
             env={"PYTHONPATH": ['.'],
                  "PYPYCHERRYPICK": cherrypick}))
+
 
 class Translated(factory.BuildFactory):
 
@@ -266,7 +290,7 @@ class Translated(factory.BuildFactory):
                          "--root=pypy", "--timeout=1800"
                          ] + ["--config=%s" % cfg for cfg in app_tests],
                 logfiles={'pytestLog': 'pytest-A.log'},
-                timeout = 4000,
+                timeout=4000,
                 env={"PYTHONPATH": ['.']}))
 
         if lib_python:
@@ -325,23 +349,24 @@ class Translated(factory.BuildFactory):
                                 masterdest=WithProperties(nightly),
                                 basename=name + extension,
                                 workdir='.',
-                                blocksize=100*1024))
+                                blocksize=100 * 1024))
+
 
 class JITBenchmark(factory.BuildFactory):
-    def __init__(self, platform='linux', host='tannit', postfix=None):
+    def __init__(self, platform='linux', host='tannit', postfix=''):
         factory.BuildFactory.__init__(self)
 
         setup_steps(platform, self)
         #
         repourl = 'https://bitbucket.org/pypy/benchmarks'
         update_hg(platform, self, repourl, 'benchmarks', use_branch=False)
-        #
         if host == 'tannit':
             lock = TannitCPU
         elif host == 'speed_python':
             lock = SpeedPythonCPU
         else:
             assert False, 'unknown host %s' % host
+
         #
         self.addStep(
             Translate(
@@ -367,22 +392,28 @@ class JITBenchmark(factory.BuildFactory):
                 masterdest=WithProperties(resfile),
                 workdir="."))
         pypy_c_rel = "../build/pypy/translator/goal/pypy-c"
-        if postfix:
-            addopts = ['--postfix', postfix]
-        else:
-            addopts = []
         self.addStep(ShellCmd(
             # this step needs exclusive access to the CPU
             locks=[lock.access('exclusive')],
             description="run benchmarks on top of pypy-c",
             command=["python", "runner.py", '--output-filename', 'result.json',
-                    '--pypy-c', pypy_c_rel,
+                     '--changed', pypy_c_rel,
                      '--baseline', pypy_c_rel,
                      '--args', ',--jit off',
                      '--upload',
+                     '--upload-executable', 'pypy-c' + postfix,
+                     '--upload-project', 'PyPy',
                      '--revision', WithProperties('%(got_revision)s'),
                      '--branch', WithProperties('%(branch)s'),
-                     ] + addopts,
+                     '--upload-urls', 'http://speed.pypy.org/',
+                     '--upload-baseline',
+                     '--upload-baseline-executable', 'pypy-c-jit' + postfix,
+                     '--upload-baseline-project', 'PyPy',
+                     '--upload-baseline-revision',
+                     WithProperties('%(got_revision)s'),
+                     '--upload-baseline-branch', WithProperties('%(branch)s'),
+                     '--upload-baseline-urls', 'http://localhost',
+                     ],
             workdir='./benchmarks',
             timeout=3600))
         # a bit obscure hack to get both os.path.expand and a property
@@ -390,4 +421,78 @@ class JITBenchmark(factory.BuildFactory):
         resfile = os.path.expanduser("~/bench_results/%s.json" % filename)
         self.addStep(transfer.FileUpload(slavesrc="benchmarks/result.json",
                                          masterdest=WithProperties(resfile),
+                                         workdir="."))
+
+
+class CPythonBenchmark(factory.BuildFactory):
+    '''
+    Check out and build CPython and run the benchmarks with it.
+
+    This will overwrite the branch even if it was specified
+    in the buildbot webinterface!
+    '''
+    def __init__(self, branch, platform='linux64'):
+        '''
+        branch: The branch of cpython that will be used.
+        '''
+        factory.BuildFactory.__init__(self)
+
+        # checks out and updates the repo
+        setup_steps(platform, self, repourl='http://hg.python.org/cpython',
+                    force_branch=branch)
+
+        # check out and update benchmarks
+        repourl = 'https://bitbucket.org/pypy/benchmarks'
+        update_hg(platform, self, repourl, 'benchmarks', use_branch=False)
+
+        lock = SpeedPythonCPU
+
+        self.addStep(ShellCmd(
+            description="configure cpython",
+            command=["./configure"],
+            timeout=300,
+            haltOnFailure=True))
+
+        self.addStep(ShellCmd(
+            description="cleanup cpython",
+            command=["make", "clean"],
+            timeout=300))
+
+        self.addStep(ShellCmd(
+            description="make cpython",
+            command=["make"],
+            timeout=600,
+            haltOnFailure=True))
+
+        self.addStep(ShellCmd(
+            description="test cpython",
+            command=["make", "buildbottest"],
+            haltOnFailure=False,
+            warnOnFailure=True,
+            timeout=600))
+
+        cpython_interpreter = '../build/python'
+        self.addStep(ShellCmd(
+            # this step needs exclusive access to the CPU
+            locks=[lock.access('exclusive')],
+            description="run benchmarks on top of cpython",
+            command=["python", "runner.py", '--output-filename', 'result.json',
+                     '--changed', cpython_interpreter,
+                     '--baseline', './nullpython.py',
+                     '--upload',
+                     '--upload-project', 'cpython',
+                     '--upload-executable', 'cpython2',
+                     '--revision', WithProperties('%(got_revision)s'),
+                     '--branch', WithProperties('%(branch)s'),
+                     '--upload-urls', 'http://localhost/',
+                     ],
+            workdir='./benchmarks',
+            haltOnFailure=True,
+            timeout=3600))
+
+        # a bit obscure hack to get both os.path.expand and a property
+        filename = '%(got_revision)s'
+        resultfile = os.path.expanduser("~/bench_results/%s.json" % filename)
+        self.addStep(transfer.FileUpload(slavesrc="benchmarks/result.json",
+                                         masterdest=WithProperties(resultfile),
                                          workdir="."))
