@@ -286,7 +286,7 @@ BuildmasterConfig = {
             MACOSX32,                  # on minime
             JITWIN32,                  # on aurora
             #JITFREEBSD64,              # on headless
-            JITMACOSX64,               # on mvt's machine
+            #JITMACOSX64,               # on mvt's machine
             ], branch=None, hour=0, minute=0),
 
         Nightly("nightly-0-45", [
@@ -318,7 +318,6 @@ BuildmasterConfig = {
             BUILDLINUXARM,                 # on hhu-cross-armel, uses 1 core
             BUILDJITLINUXARM,              # on hhu-cross-armel, uses 1 core
             JITBACKENDONLYLINUXARMEL,      # on hhu-beagleboard or hhu-imx.53
-            JITBACKENDONLYLINUXARMELXDIST, # on hhu-arm, uses hhu-beagleboard or hhu-imx.53
             ], branch=None, hour=0, minute=0),
         #
         Triggerable("APPLVLLINUXARM_scheduler", [
@@ -337,12 +336,12 @@ BuildmasterConfig = {
 
     'builders': [
                   {"name": LINUX32,
-                   "slavenames": ["allegro32"],
+                   "slavenames": ["tannit32"],
                    "builddir": LINUX32,
                    "factory": pypyOwnTestFactory,
                    "category": 'linux32',
                    # this build needs 4 CPUs
-                   #"locks": [TannitCPU.access('exclusive')],
+                   "locks": [TannitCPU.access('exclusive')],
                   },
                   {"name": LINUX64,
                    "slavenames": ["allegro64"],
@@ -353,11 +352,12 @@ BuildmasterConfig = {
                    #"locks": [TannitCPU.access('exclusive')],
                   },
                   {"name": APPLVLLINUX32,
-                   "slavenames": ["allegro32"],
+                   #"slavenames": ["allegro32"],
+                   "slavenames": ["tannit32"],
                    "builddir": APPLVLLINUX32,
                    "factory": pypyTranslatedAppLevelTestFactory,
                    'category': 'linux32',
-                   #"locks": [TannitCPU.access('counting')],
+                   "locks": [TannitCPU.access('counting')],
                   },
                   {"name": APPLVLLINUX64,
                    "slavenames": ["allegro64"],
@@ -367,11 +367,12 @@ BuildmasterConfig = {
                    #"locks": [TannitCPU.access('counting')],
                   },
                   {"name": LIBPYTHON_LINUX32,
-                   "slavenames": ["allegro32"],
+                   "slavenames": ["tannit32"],
+#                   "slavenames": ["allegro32"],
                    "builddir": LIBPYTHON_LINUX32,
                    "factory": pypyTranslatedLibPythonTestFactory,
                    'category': 'linux32',
-                   #"locks": [TannitCPU.access('counting')],
+                   "locks": [TannitCPU.access('counting')],
                   },
                   {"name": LIBPYTHON_LINUX64,
                    "slavenames": ["allegro64"],
@@ -388,11 +389,12 @@ BuildmasterConfig = {
                    #"locks": [TannitCPU.access('counting')],
                   },
                   {"name" : JITLINUX32,
-                   "slavenames": ["allegro32"],
+                   #"slavenames": ["allegro32"],
+                   "slavenames": ["tannit32"],
                    'builddir' : JITLINUX32,
                    'factory' : pypyJITTranslatedTestFactory,
                    'category' : 'linux32',
-                   #"locks": [TannitCPU.access('counting')],
+                   "locks": [TannitCPU.access('counting')],
                    },
                   {'name': JITLINUX64,
                    'slavenames': ["allegro64"],
@@ -527,7 +529,7 @@ BuildmasterConfig = {
                    "locks": [ARMXdistLock.access('exclusive'), ARMBoardLock.access('counting')],
                    },
                   {"name": JITBACKENDONLYLINUXARMEL,
-                   "slavenames": ['hhu-beagleboard', 'hhu-i.mx53'],
+                   "slavenames": ['hhu-i.mx53'],
                    "builddir": JITBACKENDONLYLINUXARMEL,
                    "factory": pypyJitBackendOnlyOwnTestFactoryARM,
                    "category": 'linux-armel',
@@ -535,14 +537,14 @@ BuildmasterConfig = {
                    },
                   # app level builders
                   {"name": APPLVLLINUXARM,
-                   "slavenames": ["hhu-beagleboard", "hhu-i.mx53"],
+                   "slavenames": ["hhu-beagleboard"],
                    "builddir": APPLVLLINUXARM,
                    "factory": pypyARMTranslatedAppLevelTestFactory,
                    "category": "linux-armel",
                    "locks": [ARMXdistLock.access('counting'), ARMBoardLock.access('counting')],
                    },
                   {"name": JITLINUXARM,
-                   "slavenames": ["hhu-beagleboard", "hhu-i.mx53"],
+                   "slavenames": ["hhu-beagleboard"],
                    'builddir': JITLINUXARM,
                    'factory': pypyARMJITTranslatedTestFactory ,
                    'category': 'linux-armel',
