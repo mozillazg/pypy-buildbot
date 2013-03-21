@@ -1,11 +1,10 @@
 import os.path
 import datetime
 import itertools
-import re
 import py
 import cgi
 import urllib
-from twisted.web import resource
+import sys
 from twisted.web.static import File, DirectoryLister
 
 class PyPyTarball(object):
@@ -103,13 +102,31 @@ class PyPyTarball(object):
     def display_in_italic(self):
         return self.vcs == 'latest'
 
+class PyPyDirectory(object):
+    def __init__(self, filePath):
+        self.filename = filePath.basename()
+        self.filePath = filePath
+        self.parse_filename()
+
+    def parse_filename(self):
+        if self.filename == 'trunk':
+            self.last_mod_time = sys.maxsize
+            return
+        self.last_mod_time = self.filePath.getmtime()
+
+    def key(self):
+        return (self.last_mod_time)
 
 class PyPyList(File):
 
-    def listNames(self):
-        names = File.listNames(self)
+    def sortBuildNames(self, names):
         items = map(PyPyTarball, names)
         items.sort(key=PyPyTarball.key, reverse=True)
+        return [item.filename for item in items]
+
+    def sortDirectoryNames(self, filePaths):
+        items = map(PyPyDirectory, filePaths)
+        items.sort(key=PyPyDirectory.key, reverse=True)
         return [item.filename for item in items]
 
     def directoryListing(self):
@@ -118,10 +135,12 @@ class PyPyList(File):
                 if name.startswith('pypy-c'):
                     return True
             return False
-        names = self.listNames()
+        names = File.listNames(self)
         if is_pypy_dir(names):
+            names = self.sortBuildNames(names)
             Listener = PyPyDirectoryLister
         else:
+            names = self.sortDirectoryNames(File.listEntities(self))
             Listener = DirectoryLister
         return Listener(self.path,
                         names,
