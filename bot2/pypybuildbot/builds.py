@@ -1,4 +1,5 @@
 from buildbot.steps.source.mercurial import Mercurial
+from buildbot.steps.source.git import Git
 from buildbot.process.buildstep import BuildStep
 from buildbot.process import factory
 from buildbot.steps import shell, transfer
@@ -85,7 +86,7 @@ class PyPyDownload(transfer.FileDownload):
 
         properties = self.build.getProperties()
         branch = map_branch_name(properties['branch'])
-        revision = properties['final_file_name']
+        revision = properties.getProperty('final_file_name')
         mastersrc = os.path.expanduser(self.mastersrc)
 
         if branch.startswith('/'):
@@ -185,6 +186,31 @@ class PytestCmd(ShellCmd):
 # XXX in general it would be nice to drop the revision-number using only the
 # changeset-id for got_revision and final_file_name and sorting the builds
 # chronologically
+
+class UpdateGitCheckout(ShellCmd):
+    description = 'git checkout'
+    command = 'UNKNOWN'
+
+    def __init__(self, workdir=None, haltOnFailure=True, force_branch=None,
+                 **kwargs):
+        ShellCmd.__init__(self, workdir=workdir, haltOnFailure=haltOnFailure,
+                          **kwargs)
+        self.force_branch = force_branch
+        self.addFactoryArguments(force_branch=force_branch)
+
+    def start(self):
+        if self.force_branch is not None:
+            branch = self.force_branch
+            # Note: We could add a warning to the output if we
+            # ignore the branch set by the user.
+        else:
+            properties = self.build.getProperties()
+            branch = properties['branch'] or 'default'
+        command = ["git", "checkout", "-f", branch]
+        self.setCommand(command)
+        ShellCmd.start(self)
+
+
 class CheckGotRevision(ShellCmd):
     description = 'got_revision'
     command = ['hg', 'parents', '--template', 'got_revision:{rev}:{node}']
@@ -300,6 +326,15 @@ def update_hg(platform, factory, repourl, workdir, use_branch,
                 workdir=workdir,
                 logEnviron=False))
 
+def update_git(platform, factory, repourl, workdir, use_branch,
+              force_branch=None):
+    factory.addStep(
+            Git(
+                repourl=repourl,
+                mode='full',
+                method='fresh',
+                workdir=workdir,
+                logEnviron=False))
 
 def setup_steps(platform, factory, workdir=None,
                 repourl='https://bitbucket.org/pypy/pypy/',
@@ -607,20 +642,6 @@ class JITBenchmark(factory.BuildFactory):
                 locks=[lock.access('counting')],
                 )
             )
-        if host == 'tannit':
-            pypy_c_rel = 'build/pypy/goal/pypy-c'
-            self.addStep(ShellCmd(
-                env={'PYTHONPATH': './benchmarks/lib/jinja2'},
-                description="measure numpy compatibility",
-                command=[pypy_c_rel,
-                         'build/pypy/module/micronumpy/tool/numready/',
-                         pypy_c_rel, 'numpy-compat.html'],
-                workdir="."))
-            resfile = os.path.expanduser("~/numpy_compat/%(got_revision)s.html")
-            self.addStep(NumpyStatusUpload(
-                slavesrc="numpy-compat.html",
-                masterdest=WithProperties(resfile),
-                workdir="."))
         pypy_c_rel = "../build/pypy/goal/pypy-c"
         self.addStep(ShellCmd(
             # this step needs exclusive access to the CPU
@@ -758,3 +779,93 @@ class PyPyBuildbotTestFactory(factory.BuildFactory):
                      "--resultlog=testrun.log",
                      ],
             logfiles={'pytestLog': 'testrun.log'}))
+
+
+class NativeNumpyTests(factory.BuildFactory):
+    '''
+    Download a pypy nightly, install nose and numpy, and run the numpy test suite
+    '''
+    def __init__(self, platform='linux',
+                 app_tests=False,
+                 host = 'tannit',
+                 lib_python=False,
+                 pypyjit=True,
+                 prefix=None,
+                 translationArgs=[]
+                 ):
+        factory.BuildFactory.__init__(self)
+
+        self.addStep(ParseRevision(hideStepIf=ParseRevision.hideStepIf,
+                                  doStepIf=ParseRevision.doStepIf))
+        # download corresponding nightly build
+        self.addStep(ShellCmd(
+            description="Clear pypy-c",
+            command=['rm', '-rf', 'pypy-c'],
+            workdir='.'))
+        extension = get_extension(platform)
+        name = build_name(platform, pypyjit, translationArgs, placeholder='%(final_file_name)s') + extension
+        self.addStep(PyPyDownload(
+            basename=name,
+            mastersrc='~/nightly',
+            slavedest='pypy_build' + extension,
+            workdir='pypy-c'))
+
+        # extract downloaded file
+        if platform.startswith('win'):
+            raise NotImplementedError
+        else:
+            self.addStep(ShellCmd(
+                description="decompress pypy-c",
+                command=['tar', '--extract', '--file=pypy_build'+ extension, '--strip-components=1', '--directory=.'],
+                workdir='pypy-c',
+                haltOnFailure=True,
+                ))
+
+        # virtualenv the download
+        self.addStep(ShellCmd(
+            description="create virtualenv",
+            command=['virtualenv','-p', 'pypy-c/bin/pypy', 'install'],
+            workdir='./',
+            haltOnFailure=True,
+            ))
+
+        self.addStep(ShellCmd(
+            description="install nose",
+            command=['install/bin/pip', 'install','nose'],
+            workdir='./',
+            haltOnFailure=True,
+            ))
+
+        # obtain a pypy-compatible branch of numpy
+        numpy_url = 'https://www.bitbucket.org/pypy/numpy'
+        numpy_pypy_branch = 'pypy-compat'
+        update_git(platform, self, numpy_url, 'numpy_src', use_branch=True,
+              force_branch=numpy_pypy_branch)
+
+        self.addStep(ShellCmd(
+            description="install numpy",
+            command=['../install/bin/python', 'setup.py','install'],
+            workdir='numpy_src'))
+
+        self.addStep(ShellCmd(
+            description="test numpy",
+            command=['bin/nosetests', 'site-packages/numpy',
+                    ],
+            #logfiles={'pytestLog': 'pytest-numpy.log'},
+            timeout=4000,
+            workdir='install',
+            #env={"PYTHONPATH": ['download']}, # shouldn't be needed, but what if it is set externally?
+        ))
+        if host == 'tannit':
+            pypy_c_rel = 'install/bin/python'
+            self.addStep(ShellCmd(
+                description="measure numpy compatibility",
+                command=[pypy_c_rel,
+                         'numpy_src/tools/numready/',
+                         pypy_c_rel, 'numpy-compat.html'],
+                workdir="."))
+            resfile = os.path.expanduser("~/numpy_compat/%(got_revision)s.html")
+            self.addStep(NumpyStatusUpload(
+                slavesrc="numpy-compat.html",
+                masterdest=WithProperties(resfile),
+                workdir="."))
