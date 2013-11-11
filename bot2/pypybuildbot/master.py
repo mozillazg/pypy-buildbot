@@ -148,6 +148,8 @@ pypyJITBenchmarkFactory_tannit = pypybuilds.JITBenchmark()
 pypyJITBenchmarkFactory64_tannit = pypybuilds.JITBenchmark(platform='linux64',
                                                            postfix='-64')
 
+pypyNumpyCompatability = pypybuilds.NativeNumpyTests(platform='linux64')
+
 #
 
 LINUX32 = "own-linux-x86-32"
@@ -180,7 +182,7 @@ JITBENCH = "jit-benchmark-linux-x86-32"
 JITBENCH64 = "jit-benchmark-linux-x86-64"
 JITBENCH64_2 = 'jit-benchmark-linux-x86-64-2'
 CPYTHON_64 = "cpython-2-benchmark-x86-64"
-
+NUMPY_64 = "numpy-compatability-linux-x86-64"
 # buildbot builder
 PYPYBUILDBOT = 'pypy-buildbot'
 
@@ -264,6 +266,7 @@ BuildmasterConfig = {
                         JITONLYLINUXPPC64,
                         JITBENCH,
                         JITBENCH64,
+                        NUMPY_64,
             ] + ARM.builderNames, properties=[]),
     ] + ARM.schedulers,
 
@@ -432,6 +435,13 @@ BuildmasterConfig = {
                    'builddir': INDIANA32,
                    'factory': pypyOwnTestFactoryIndiana,
                    'category': 'openindiana32',
+                   },
+                  {'name': NUMPY_64,
+                   'slavenames': ["tannit64"],
+                   'builddir': NUMPY_64,
+                   'factory': pypyNumpyCompatability,
+                   'category': 'numpy',
+                   'locks': [TannitCPU.access('counting')],
                    },
                   {'name': PYPYBUILDBOT,
                    'slavenames': ['cobra'],
