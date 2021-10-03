@@ -544,7 +544,6 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
                 '--durations=20'],
             logfiles={'pytestLog': 'extra.log'},
             workdir='venv',
-            timeout=6000,
         ))
 
     if lib_python:
@@ -575,7 +574,7 @@ class Untranslated(factory.BuildFactory):
 
         setup_steps(platform, self)
 
-        self.timeout=kwargs.get('timeout', 2000)
+        self.timeout=kwargs.get('timeout', 4000)
 
         nDays = '3' #str, not int
         if platform in ("win32", "win64"):
