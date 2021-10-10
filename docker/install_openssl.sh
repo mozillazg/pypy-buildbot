@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe pipefail
+set -xeo pipefail
 
 OPENSSL_URL="https://www.openssl.org/source/"
 OPENSSL_NAME="openssl-1.1.1j"
@@ -13,13 +13,15 @@ function check_sha256sum {
     rm "${fname}.sha256"
 }
 
-curl -q -#O "${OPENSSL_URL}/${OPENSSL_NAME}.tar.gz"
+echo args are $1 $2
+
+curl -sS -#O "${OPENSSL_URL}/${OPENSSL_NAME}.tar.gz"
 check_sha256sum ${OPENSSL_NAME}.tar.gz ${OPENSSL_SHA256}
 tar zxf ${OPENSSL_NAME}.tar.gz
 PATH=/opt/perl/bin:$PATH
 pushd ${OPENSSL_NAME}
 if [ "$2" == "m32" ]; then
-  setarch i386 ./config no-comp no-shared no-dynamic-engine -m32 --prefix=/usr/local --openssldir=/usr/local
+  setarch i386 ./Configure no-comp no-shared no-dynamic-engine -m32 linux-generic32 --prefix=/usr/local --openssldir=/usr/local
 else
   ./config no-comp enable-ec_nistp_64_gcc_128 no-shared no-dynamic-engine --prefix=/usr/local --openssldir=/usr/local
 fi

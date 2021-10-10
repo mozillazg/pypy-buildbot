@@ -12,7 +12,7 @@ function check_sha256sum {
     rm "${fname}.sha256"
 }
 
-curl -q -#O "https://mirrors.ocf.berkeley.edu/debian/pool/main/libf/libffi/libffi_${LIBFFI_VERSION}.orig.tar.gz"
+curl -sS -#O "https://mirrors.ocf.berkeley.edu/debian/pool/main/libf/libffi/libffi_${LIBFFI_VERSION}.orig.tar.gz"
 check_sha256sum "libffi_${LIBFFI_VERSION}.orig.tar.gz" ${LIBFFI_SHA256}
 tar zxf libffi*.orig.tar.gz
 PATH=/opt/perl/bin:$PATH
