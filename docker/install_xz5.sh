@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set -xe pipefail
 XZ5_FILE=xz-5.2.4.tar.gz
 
 wget -q "https://tukaani.org/xz/${XZ5_FILE}"

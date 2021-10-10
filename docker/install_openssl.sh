@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set -xe pipefail
 
 OPENSSL_URL="https://www.openssl.org/source/"
 OPENSSL_NAME="openssl-1.1.1j"
