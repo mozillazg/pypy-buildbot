@@ -75,6 +75,8 @@ RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
 
 # prefer our libraries in /usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+# but remove broken libcrypt
+RUN rm -rf /usr/local/lib/libcrypt.*
 
 # get a pypy for translation.
 
