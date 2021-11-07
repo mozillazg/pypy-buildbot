@@ -47,6 +47,7 @@ RUN yum -y update
 RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
    libXt-devel patch expat-devel libXft-devel tk-devel gdbm-devel gdb vim \
    perl sqlite-devel prelink python-virtualenv
+RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
 # manylinux2010 uses a buggy gcc. Replace it.
 RUN yum -y remove devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++ devtoolset-8-gcc-gfortran

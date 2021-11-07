@@ -51,6 +51,7 @@ RUN yum -y update
 RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
    libXt-devel patch expat-devel libXft-devel tk-devel gdbm-devel gdb vim \
    perl sqlite-devel python-virtualenv libffi-devel libunwind-devel
+RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
 # Taken from pyca/infra/cryptography-manylinux
 # Use the version of openssl that latests pyca/cryptography uses
