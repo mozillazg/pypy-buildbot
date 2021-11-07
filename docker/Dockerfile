@@ -74,6 +74,8 @@ RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 Add install_gc.sh /root/install_gc.sh
 RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
 
+RUN yum clean packages
+
 # prefer our libraries in /usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 # but remove broken libcrypt
@@ -86,8 +88,6 @@ RUN ln -s /opt/pypy2.7-v7.3.6rc2-linux64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
-
-RUN yum clean packages
 
 # build a python 2.7 virtualenv, use the /opt/python/cp27-cp27mu/bin/python
 # since centos6 itself has python2.6
