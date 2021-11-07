@@ -42,9 +42,7 @@
 # This will enter the docker as root. Don't do "su - buildslave",
 # do "su buildslave"
 
-# Use an image that still has python2.7
-# https://github.com/pypa/manylinux/issues/428#issuecomment-774729597
-FROM quay.io/pypa/manylinux2014_aarch64:2021-03-24-f395ab8
+FROM quay.io/pypa/manylinux2014_aarch64:2021-10-26-cf1e11e
 WORKDIR /root
 
 RUN yum -y update
@@ -63,7 +61,7 @@ RUN sh install_openssl.sh manylinux2014 2>&1 | tee /root/install_openssl.log
 # ADD lasse_collin_pubkey.txt /root/lasse_collin_pubkey.txt
 # ADD xz-5.2.4.tar.gz.sig /root/xz-5.2.4.tar.gz.sig
 # RUN sh install_xz5.sh manylinux2014 2>&1 | tee /root/install_xz5.log
-ADD install_ncurses.sh /root/install_ncurses.sh 
+ADD install_ncurses.sh /root/install_ncurses.sh
 RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 # centos6 provides gc7.1, which does not work in a docker. Use a newer version
 # This is for testing only
@@ -75,11 +73,11 @@ RUN yum clean packages
 # prefer our libraries in /usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 # but remove broken libcrypt
-RUN rm -rf /usr/local/lib/libcrypt.*
+# RUN rm -rf /usr/local/lib/libcrypt.*
 
 # build python 2.7.18 and link it to a virtualenv
 # since centos7 has python2.7.5
-RUN wget http://python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
+RUN wget -q --no-check-certificate http://python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
 RUN tar xf Python-2.7.18.tar.xz
 RUN (cd Python-2.7.18 && ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" && make && make altinstall)
 RUN /usr/local/bin/python2.7 -m ensurepip
@@ -92,8 +90,8 @@ RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv
 RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
-RUN wget -q https://downloads.python.org/pypy/pypy2.7-v7.3.6rc2-aarc64.tar.bz2 -O - | tar -C /opt -xj
-RUN ln -s /opt/pypy2.7-v7.3.6rc2-aarch64/bin/pypy /usr/local/bin/pypy
+RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.6-aarch64.tar.bz2 -O - | tar -C /opt -xj
+RUN ln -s /opt/pypy2.7-v7.3.6-aarch64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
