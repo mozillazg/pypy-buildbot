@@ -1,3 +1,5 @@
+# Dockerfile based on manylinux2014_x86_64
+#
 # Build with something like this, where
 #  -t is the name of the image
 #  -f is this file
@@ -6,7 +8,7 @@
 # docker build -t buildslave_x86_64 --build-arg BUILDSLAVE_UID=1001 -f docker/Dockerfile docker 
 #
 # To create the buildslave configuration, call
-# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
 #    -eSLAVENAME=<name> -ePASSWORD=<password> buildslave_x86_64
 # Then you can examine the <build_dir>/buildbot.tac file.
 #
@@ -40,34 +42,26 @@
 # This will enter the docker as root. Don't do "su - buildslave",
 # do "su buildslave"
 
-FROM quay.io/pypa/manylinux2010_x86_64:2021-02-06-3d322a5
+FROM quay.io/pypa/manylinux2014_x86_64:2021-10-26-cf1e11e
 WORKDIR /root
 
 RUN yum -y update
 RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
    libXt-devel patch expat-devel libXft-devel tk-devel gdbm-devel gdb vim \
-   perl sqlite-devel prelink python-virtualenv
+   perl sqlite-devel python-virtualenv libffi-devel libunwind-devel openssl-devel
 RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
-# manylinux2010 uses a buggy gcc. Replace it.
-RUN yum -y remove devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++ devtoolset-8-gcc-gfortran
-RUN yum -y install devtoolset-7-binutils devtoolset-7-gcc devtoolset-7-gcc-c++ devtoolset-7-gcc-gfortran
-ENV PATH=/opt/rh/devtoolset-7/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Later on openssl files are put in /usr/local/lib64, but expected to be in /usr/local/lib
+RUN rm -rf /usr/local/lib64
+RUN ln -s /usr/local/lib /usr/local/lib64
 
 # Taken from pyca/infra/cryptography-manylinux
-# centos6 libffi is buggy, download and use a newer one
-# also use the version of openssl that latests pyca/cryptography uses
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:/usr/local/lib/pkgconfig
+# Use the version of openssl that latests pyca/cryptography uses
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:/usr/lib64/pkgconfig
 ADD install_openssl.sh /root/install_openssl.sh
-ADD install_libffi.sh /root/install_libffi.sh
-RUN sh install_libffi.sh manylinux2010 2>&1 | tee /root/install_libffi.log
-RUN sh install_openssl.sh manylinux2010 2>&1 | tee /root/install_openssl.log
+RUN sh install_openssl.sh manylinux2014 2>&1 | tee /root/install_openssl.log
 # Use an up-to-date version of xz for lzma
-ADD install_xz5.sh /root/install_xz5.sh
-ADD lasse_collin_pubkey.txt /root/lasse_collin_pubkey.txt
-ADD xz-5.2.4.tar.gz.sig /root/xz-5.2.4.tar.gz.sig
-RUN sh install_xz5.sh manylinux2010 2>&1 | tee /root/install_xz5.log
-ADD install_ncurses.sh /root/install_ncurses.sh 
+ADD install_ncurses.sh /root/install_ncurses.sh
 RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 # centos6 provides gc7.1, which does not work in a docker. Use a newer version
 # This is for testing only
@@ -79,23 +73,32 @@ RUN yum clean packages
 # prefer our libraries in /usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 # but remove broken libcrypt
-RUN rm -rf /usr/local/lib/libcrypt.*
+# RUN rm -rf /usr/local/lib/libcrypt.*
+
+# build python 2.7.18 and link it to a virtualenv
+# since centos7 has python2.7.5
+RUN wget -q --no-check-certificate http://python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
+RUN tar xf Python-2.7.18.tar.xz
+RUN (cd Python-2.7.18 && ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" && make && make altinstall) > /build_python.log
+RUN /usr/local/bin/python2.7 -m ensurepip
+RUN /usr/local/bin/python2.7 -m pip install virtualenv
+run /usr/local/bin/python2.7 -m virtualenv /python27_virt
+ENV PATH=/python27_virt/bin:$PATH
+RUN pip install --upgrade pip==20.3.4
+RUN pip install --upgrade setuptools
+RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv
+RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
-
-RUN wget -q https://downloads.python.org/pypy/pypy2.7-v7.3.6rc2-linux64.tar.bz2 -O - | tar -C /opt -xj
-RUN ln -s /opt/pypy2.7-v7.3.6rc2-linux64/bin/pypy /usr/local/bin/pypy
+RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.6-linux64.tar.bz2 -O - | tar -C /opt -xj
+RUN ln -s /opt/pypy2.7-v7.3.6-linux64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
 
-# build a python 2.7 virtualenv, use the /opt/python/cp27-cp27mu/bin/python
-# since centos6 itself has python2.6
-RUN virtualenv -p /opt/python/cp27-cp27mu/bin/python /python27_virt
-ENV PATH=/python27_virt/bin:$PATH
-RUN pip install --upgrade pip==20.3.4
-RUN pip install --upgrade setuptools
-RUN pip install buildbot-slave pytest hypothesis==4.42 cffi vmprof mercurial virtualenv
+# Remove newer sqlite3 from /usr/local/lib since it does not match the headers
+# in /usr/include
+RUN rm -rf /usr/local/lib/libsqlite3*
 
 # Define a user
 ARG BUILDSLAVE_UID=1001
