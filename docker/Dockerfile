@@ -48,7 +48,8 @@ WORKDIR /root
 RUN yum -y update
 RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
    libXt-devel patch expat-devel libXft-devel tk-devel gdbm-devel gdb vim \
-   perl sqlite-devel python-virtualenv libffi-devel libunwind-devel openssl-devel
+   perl sqlite-devel python-virtualenv libffi-devel libunwind-devel openssl-devel \
+   xz-devel
 RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
 # Later on openssl files are put in /usr/local/lib64, but expected to be in /usr/local/lib
