@@ -83,7 +83,7 @@ run /usr/local/bin/python2.7 -m virtualenv /python27_virt
 ENV PATH=/python27_virt/bin:$PATH
 RUN pip install --upgrade pip==20.3.4
 RUN pip install --upgrade setuptools
-RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv
+RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv pexpect
 RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
