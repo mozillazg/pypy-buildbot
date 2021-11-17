@@ -243,7 +243,6 @@ LINUX32OWN = "own-linux-x86-32"
 LINUX64OWN = "own-linux-x86-64"
 AARCH64OWN = "own-linux-aarch64"
 LINUX_S390XOWN = "own-linux-s390x"
-MACOSX32OWN = "own-macosx-x86-32"
 WIN32OWN = "own-win-x86-32"
 WIN64OWN = "own-win-x86-64"
 
@@ -251,7 +250,6 @@ LINUX32RPYTHON = "rpython-linux-x86-32"
 LINUX64RPYTHON = "rpython-linux-x86-64"
 AARCH64RPYTHON = "rpython-linux-aarch64"
 LINUX_S390XRPYTHON = "rpython-linux-s390x"
-MACOSX32RPYTHON = "rpython-macosx-x86-32"
 WIN32RPYTHON = "rpython-win-x86-32"
 WIN64RPYTHON = "rpython-win-x86-64"
 
@@ -439,12 +437,10 @@ BuildmasterConfig = {
                         LINUX32OWN,
                         LINUX64OWN,
                         AARCH64OWN,
-                        MACOSX32OWN,
                         WIN32OWN,
                         LINUX32RPYTHON,
                         LINUX64RPYTHON,
                         AARCH64RPYTHON,
-                        MACOSX32RPYTHON,
                         WIN32RPYTHON,
                         WIN64RPYTHON,
 
@@ -599,18 +595,6 @@ BuildmasterConfig = {
                     "category": "benchmark-run",
                     "locks": [Bencher4Lock.access('exclusive')],
                     },
-                  {"name": MACOSX32OWN,
-                   "slavenames": ["minime"],
-                   "builddir": MACOSX32OWN,
-                   "factory": pypyOwnTestFactoryOSX32,
-                   "category": 'mac32'
-                  },
-                  {"name": MACOSX32RPYTHON,
-                   "slavenames": ["minime"],
-                   "builddir": MACOSX32RPYTHON,
-                   "factory": pypyRPythonTestFactoryOSX32,
-                   "category": 'mac32'
-                  },
                   {"name" : JITMACOSX64,
                    "slavenames": ["rebuy-de", "tosh", "osx-10.9-x64-dw", "billenstein-sierra"],  # "xerxes"
                    'builddir' : JITMACOSX64,
