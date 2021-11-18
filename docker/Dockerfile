@@ -106,6 +106,7 @@ ARG BUILDSLAVE_UID=1001
 ARG PARALLEL_BUILDS=4
 RUN adduser buildslave --uid=$BUILDSLAVE_UID
 RUN echo parallel_runs=$PARALLEL_BUILDS > /home/buildslave/machine_cfg.py
+ENV PYPY_LOCALBASE=/usr/local
 
 # NOTE: always use
 # su buildslave
