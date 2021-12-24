@@ -519,7 +519,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             description="Install recent virtualenv",
             command=prefix + [target, '-mpip', 'install', '--upgrade',
                               '--no-warn-script-location',
-                              'pip', '"setuptools<60"', 'virtualenv'],
+                              'pip', 'setuptools<60', 'virtualenv'],
             workdir='venv',
             flunkOnFailure=True))
         factory.addStep(ShellCmd(
