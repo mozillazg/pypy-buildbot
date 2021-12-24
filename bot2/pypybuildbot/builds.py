@@ -519,7 +519,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             description="Install recent virtualenv",
             command=prefix + [target, '-mpip', 'install', '--upgrade',
                               '--no-warn-script-location',
-                              'pip', 'setuptools<60', 'virtualenv'],
+                              'pip', 'setuptools', 'virtualenv'],
             workdir='venv',
             flunkOnFailure=True))
         factory.addStep(ShellCmd(
@@ -555,6 +555,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             timeout=4000,
             logfiles={'pytestLog': 'cpython.log'},
             env={"TMPDIR": Interpolate('%(prop:target_tmpdir)s' + factory.pytest),
+                 "SETUPTOOLS_USE_DISTUTILS": "stdlib",
                 }))
 
     if pypyjit:
