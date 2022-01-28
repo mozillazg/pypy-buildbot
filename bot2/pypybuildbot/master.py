@@ -390,7 +390,7 @@ BuildmasterConfig = {
             onlyIfChanged=True,
         ),
 
-        Nightly("nightly-1-01", [
+        Nightly("nightly-1-02", [
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
