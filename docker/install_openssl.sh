@@ -2,8 +2,8 @@
 set -xeo pipefail
 
 OPENSSL_URL="https://www.openssl.org/source/"
-OPENSSL_NAME="openssl-1.1.1j"
-OPENSSL_SHA256="aaf2fcb575cdf6491b98ab4829abf78a3dec8402b8b81efc8f23c00d443981bf"
+OPENSSL_NAME="openssl-1.1.1m"
+OPENSSL_SHA256="f89199be8b23ca45fc7cb9f1d8d3ee67312318286ad030f5316aca6462db6c96"
 
 function check_sha256sum {
     local fname=$1

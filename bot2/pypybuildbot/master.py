@@ -328,6 +328,8 @@ BuildmasterConfig = {
                  branch='py3.7', pollinterval=20*60+17),
         HgPoller('http://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
                  branch='py3.8', pollinterval=20*60+17),
+        HgPoller('http://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
+                 branch='py3.9', pollinterval=20*60+17),
         ],
 
     'schedulers': [
@@ -388,6 +390,14 @@ BuildmasterConfig = {
             onlyIfChanged=True,
         ),
 
+        Nightly("nightly-1-01", [
+            JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
+            #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
+
+            ], branch='py3.9', hour=15, minute=0,
+            onlyIfChanged=True,
+        ),
+
         Triggerable("NUMPY64_scheduler", [
             #NUMPY_64,                  # uses 1 core, takes about 5min.
         ]),
@@ -423,7 +433,22 @@ BuildmasterConfig = {
             JITWIN64,                  # on SalsaSalsa
             JITLINUX_S390X,
             ], branch="py3.8", hour=1, minute=30,
-            onlyIfChanged=True # uses the second HgPoller?
+            onlyIfChanged=True
+        ),
+
+        Nightly("nightly-4-30-py3.9", [
+            LINUX32OWN,                # on bencher4_32, uses all cores
+            JITLINUX32,                # on bencher4_32, uses 1 core
+            LINUX64OWN,                # on bencher4, uses all cores
+            AARCH64OWN,
+            JITLINUX64,                # on bencher4, uses 1 core
+            JITAARCH64,
+            JITMACOSX64,               # on xerxes
+            WIN64OWN,                  # on SalsaSalsa
+            JITWIN64,                  # on SalsaSalsa
+            JITLINUX_S390X,
+            ], branch="py3.9", hour=4, minute=30,
+            onlyIfChanged=True 
         ),
 
         BenchmarkForceScheduler('Force Build ',
@@ -589,11 +614,11 @@ BuildmasterConfig = {
                    # the locks are acquired with fine grain inside the build
                    },
                    {"name": JITBENCH64_NEW,
-                    "slavenames": ['speed-old'],
+                    "slavenames": ['benchmarker'],
                     "builddir": JITBENCH64_NEW,
                     "factory": pypyJITBenchmarkFactory64_speed,
                     "category": "benchmark-run",
-                    "locks": [Bencher4Lock.access('exclusive')],
+                    "locks": [BenchmarkerLock.access('exclusive')],
                     },
                   {"name" : JITMACOSX64,
                    "slavenames": ["rebuy-de", "tosh", "osx-10.9-x64-dw", "billenstein-sierra"],  # "xerxes"
