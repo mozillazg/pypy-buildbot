@@ -78,7 +78,16 @@ RUN tar xf Python-2.7.18.tar.xz
 RUN (cd Python-2.7.18 && ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" && make && make altinstall)
 RUN /usr/local/bin/python2.7 -m ensurepip
 RUN /usr/local/bin/python2.7 -m pip install virtualenv
-run /usr/local/bin/python2.7 -m virtualenv /python27_virt
+# Create virtualenv with python2
+RUN mkdir -m a=rx /python27_virt
+RUN /usr/local/bin/python2.7 -m virtualenv /python27_virt
+# Since we are running as root, make sure the buildslave user has access
+# Not sure why this is needed, but :shrug:
+RUN chmod a+r -R /python27_virt
+RUN find /python27_virt -type d -exec chmod a+x "{}" ";"
+RUN chmod a+r -R /usr/local
+RUN find /usr/local -type d -exec chmod a+x "{}" ";"
+
 ENV PATH=/python27_virt/bin:$PATH
 RUN pip install --upgrade pip==20.3.4
 RUN pip install --upgrade setuptools
