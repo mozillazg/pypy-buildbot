@@ -973,7 +973,8 @@ class JITBenchmark(factory.BuildFactory):
                      '--upload',
                      '--upload-executable', exe + postfix,
                      '--upload-project', project,
-                     '--revision', rev,
+                     # use only the hash in the revision
+                     '--revision', rev.split(':')[-1],
                      '--branch', branch,
                      '--upload-urls', 'https://speed.pypy.org/',
                      '--upload-baseline',
