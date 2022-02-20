@@ -324,8 +324,6 @@ BuildmasterConfig = {
         # small variants
         HgPoller('https://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
                  branch='default', pollinterval=20*60),
-        HgPoller('https://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
-                 branch='py3.7', pollinterval=20*60+17),
         HgPoller('http://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
                  branch='py3.8', pollinterval=20*60+17),
         HgPoller('http://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
@@ -382,19 +380,11 @@ BuildmasterConfig = {
             onlyIfChanged=True,
         ),
 
-        Nightly("nightly-1-01", [
-            JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
-            #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
-
-            ], branch='py3.7', hour=11, minute=0,
-            onlyIfChanged=True,
-        ),
-
         Nightly("nightly-1-02", [
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
-            ], branch='py3.9', hour=15, minute=0,
+            ], branch='py3.9', hour=11, minute=0,
             onlyIfChanged=True,
         ),
 
@@ -405,21 +395,6 @@ BuildmasterConfig = {
         Triggerable("NUMPYWIN_scheduler", [
             #NUMPY_WIN,                  # on SalsaSalsa
         ]),
-
-        Nightly("nightly-3-00-py3.7", [
-            LINUX32OWN,                # on bencher4_32, uses all cores
-            JITLINUX32,                # on bencher4_32, uses 1 core
-            LINUX64OWN,                # on bencher4, uses all cores
-            AARCH64OWN,
-            JITLINUX64,                # on bencher4, uses 1 core
-            JITAARCH64,
-            JITMACOSX64,               # on xerxes
-            WIN64OWN,                  # on SalsaSalsa
-            JITWIN64,                  # on SalsaSalsa
-            JITLINUX_S390X,
-            ], branch="py3.7", hour=3, minute=0,
-            onlyIfChanged=True # uses the second HgPoller?
-        ),
 
         Nightly("nightly-1-30-py3.8", [
             LINUX32OWN,                # on bencher4_32, uses all cores
@@ -447,7 +422,7 @@ BuildmasterConfig = {
             WIN64OWN,                  # on SalsaSalsa
             JITWIN64,                  # on SalsaSalsa
             JITLINUX_S390X,
-            ], branch="py3.9", hour=4, minute=30,
+            ], branch="py3.9", hour=3, minute=30,
             onlyIfChanged=True 
         ),
 
