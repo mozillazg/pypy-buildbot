@@ -963,6 +963,7 @@ class JITBenchmark(factory.BuildFactory):
             exe = os.path.split(target)[-1][:-2]
             project = props.getProperty('project', default='PyPy')
             rev = props.getProperty('got_revision')
+            rev = rev.split(':')[-1]
             branch = props.getProperty('branch')
             if branch == 'None' or branch is None:
                 branch = 'default'
@@ -974,7 +975,7 @@ class JITBenchmark(factory.BuildFactory):
                      '--upload-executable', exe + postfix,
                      '--upload-project', project,
                      # use only the hash in the revision
-                     '--revision', rev.split(':')[-1],
+                     '--revision', rev,
                      '--branch', branch,
                      '--upload-urls', 'https://speed.pypy.org/',
                      '--upload-baseline',
