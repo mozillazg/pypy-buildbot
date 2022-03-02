@@ -42,13 +42,14 @@
 # This will enter the docker as root. Don't do "su - buildslave",
 # do "su buildslave"
 
-FROM quay.io/pypa/manylinux2014_x86_64:2021-10-26-cf1e11e
+FROM quay.io/pypa/manylinux2014_x86_64:latest
 WORKDIR /root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN yum -y update
 RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
-   libXt-devel patch expat-devel libXft-devel tk-devel gdbm-devel gdb vim \
-   perl sqlite-devel python-virtualenv libffi-devel libunwind-devel openssl-devel \
+   libXt-devel patch libXft-devel tk-devel gdbm-devel gdb vim \
+   perl python-virtualenv libffi-devel libunwind-devel openssl-devel \
    xz-devel
 RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
@@ -58,16 +59,21 @@ RUN ln -s /usr/local/lib /usr/local/lib64
 
 # Taken from pyca/infra/cryptography-manylinux
 # Use the version of openssl that latests pyca/cryptography uses
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:/usr/lib64/pkgconfig
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:/usr/local/lib/pkgconfig
 ADD install_openssl.sh /root/install_openssl.sh
 RUN sh install_openssl.sh manylinux2014 2>&1 | tee /root/install_openssl.log
-# Use an up-to-date version of xz for lzma
 ADD install_ncurses.sh /root/install_ncurses.sh
 RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 # centos6 provides gc7.1, which does not work in a docker. Use a newer version
 # This is for testing only
 Add install_gc.sh /root/install_gc.sh
 RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
+
+Add install_sqlite.sh /root/install_sqlite.sh
+RUN sh /root/install_sqlite.sh 2>&1 | tee /root/install_sqlite.log
+
+Add install_libexpat.sh /root/install_libexpat.sh
+RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
 
 RUN yum clean packages
 
@@ -76,19 +82,23 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 # but remove broken libcrypt
 # RUN rm -rf /usr/local/lib/libcrypt.*
 
+# This breaks the system python, so yum will no longer work
+# RUN rm /usr/include/expat* /usr/lib64/libexpat*
+# RUN rm /usr/local/lib/libsqlite3.so*
+
 # build python 2.7.18 and link it to a virtualenv
 # since centos7 has python2.7.5
 RUN wget -q --no-check-certificate http://python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
 RUN tar xf Python-2.7.18.tar.xz
-RUN (cd Python-2.7.18 && ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" && make && make altinstall) > /build_python.log
+RUN (cd Python-2.7.18 && ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" && make && make altinstall)
 RUN /usr/local/bin/python2.7 -m ensurepip
 RUN /usr/local/bin/python2.7 -m pip install virtualenv
-run /usr/local/bin/python2.7 -m virtualenv /python27_virt
+RUN /usr/local/bin/python2.7 -m virtualenv /python27_virt
 ENV PATH=/python27_virt/bin:$PATH
 RUN pip install --upgrade pip==20.3.4
 RUN pip install --upgrade setuptools
-RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv pexpect
-RUN pip install git+https://github.com/vmprof/vmprof-python.git
+RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv pexpect vmprof
+# RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
 RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.6-linux64.tar.bz2 -O - | tar -C /opt -xj
@@ -96,10 +106,6 @@ RUN ln -s /opt/pypy2.7-v7.3.6-linux64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
-
-# Remove newer sqlite3 from /usr/local/lib since it does not match the headers
-# in /usr/include
-RUN rm -rf /usr/local/lib/libsqlite3*
 
 # Define a user
 ARG BUILDSLAVE_UID=1001
