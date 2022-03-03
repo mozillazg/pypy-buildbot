@@ -68,11 +68,11 @@ RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 Add install_gc.sh /root/install_gc.sh
 RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
 
-Add install_sqlite.sh m32 /root/install_sqlite.sh
-RUN sh /root/install_sqlite.sh 2>&1 | tee /root/install_sqlite.log
+Add install_sqlite.sh /root/install_sqlite.sh
+RUN sh /root/install_sqlite.sh m32 2>&1 | tee /root/install_sqlite.log
 
-Add install_libexpat.sh m32 /root/install_libexpat.sh
-RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
+Add install_libexpat.sh /root/install_libexpat.sh
+RUN sh /root/install_libexpat.sh m32 2>&1 | tee /root/install_libexpat.log
 
 RUN yum clean packages
 
