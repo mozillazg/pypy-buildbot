@@ -102,6 +102,7 @@ Bencher4Lock = pypybuilds.Bencher4Lock
 AARCH64Lock = pypybuilds.AARCH64Lock
 
 pypyOwnTestFactory = pypybuilds.Own()
+pypyOwnTestFactoryAarch64 = pypybuilds.Own(platform="aarch64")
 pypyOwnTestFactoryWin = pypybuilds.Own(platform="win32")
 pypyOwnTestFactoryWin64 = pypybuilds.Own(platform="win64")
 pypyJitOnlyOwnTestFactory = pypybuilds.Own(cherrypick="jit")
@@ -112,7 +113,10 @@ pypyOwnTestFactoryOSX32 = pypybuilds.Own(timeout=3*3600) # XXX Own or RPython?
 pypyRPythonTestFactory = pypybuilds.RPython()
 pypyRPythonTestFactoryWin = pypybuilds.RPython(platform="win32")
 pypyRPythonTestFactoryWin64 = pypybuilds.RPython(platform="win64")
-pypyRPythonTestFactoryAarch64 = pypybuilds.RPython(timeout=3*3600)
+pypyRPythonTestFactoryAarch64 = pypybuilds.RPython(
+    timeout=3*3600,
+    platform='aarch64',
+)
 pypyJitOnlyRPythonTestFactory = pypybuilds.RPython(cherrypick="jit")
 
 # OSX 32bit tests require a larger timeout to finish
@@ -506,7 +510,7 @@ BuildmasterConfig = {
                   {"name": AARCH64OWN,
                    "slavenames": ["aarch64"],
                    "builddir": AARCH64OWN,
-                   "factory": pypyOwnTestFactory,
+                   "factory": pypyOwnTestFactoryAarch64,
                    "category": 'aarch64',
                    "locks": [AARCH64Lock.access('counting')],
                   },
@@ -574,7 +578,6 @@ BuildmasterConfig = {
                    "locks": [Bencher4Lock.access('counting')],
                   },
                   {'name': JITAARCH64,
-                   #'slavenames': ["bencher4", "speed-old"],
                    'slavenames': ["aarch64"],
                    'builddir': JITAARCH64,
                    'factory': pypyJITTranslatedTestFactoryAARCH64,
