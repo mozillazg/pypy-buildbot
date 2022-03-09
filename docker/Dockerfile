@@ -47,7 +47,7 @@ WORKDIR /root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN yum -y update
-RUN yum install -y wget bzip2-devel zlib-devel glibc-devel libX11-devel \
+RUN yum install -y wget zlib-devel glibc-devel libX11-devel \
    libXt-devel patch libXft-devel tk-devel gdbm-devel gdb vim \
    perl python-virtualenv libffi-devel libunwind-devel openssl-devel \
    xz-devel
@@ -74,6 +74,9 @@ RUN sh /root/install_sqlite.sh 2>&1 | tee /root/install_sqlite.log
 
 Add install_libexpat.sh /root/install_libexpat.sh
 RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
+
+Add install_bzip2.sh /root/install_bzip2.sh
+RUN sh /root/install_bzip2.sh 2>&1 | tee /root/install_bzip2.log
 
 RUN yum clean packages
 
