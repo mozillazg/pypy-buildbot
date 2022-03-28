@@ -1,19 +1,21 @@
 #!/bin/bash
 set -xeo pipefail
 
-SQLITE_SHA256=efb103ff4406a2217fa6147e8b88ba54f6c5582e83ef4ff2840be2b306d8172b
+SQLITE_SHA3=efb103ff4406a2217fa6147e8b88ba54f6c5582e83ef4ff2840be2b306d8172b
 SQLITE_VERSION="3380200"
 
-function check_sha256sum {
+function check_sha3 {
     local fname=$1
-    local sha256=$2
-    echo "${sha256}  ${fname}" > "${fname}.sha256"
-    sha256sum -c "${fname}.sha256"
-    rm "${fname}.sha256"
+    local sha3_in=$2
+    local sha3_file=$(openssl dgst -sha3-256 -r $fname |cut -d* -f1)
+    if [ "$sha3_file" != "$sha3_in " ]; then  # extra " " is on purpose
+        echo "sha3 mismatch"
+        exit 1
+    fi
 }
 
 curl -sS -#O "https://sqlite.org/2022/sqlite-autoconf-${SQLITE_VERSION}.tar.gz"
-check_sha256sum "sqlite-autoconf-${SQLITE_VERSION}.tar.gz" ${SQLITE_SHA256}
+check_sha3 "sqlite-autoconf-${SQLITE_VERSION}.tar.gz" ${SQLITE_SHA3}
 tar zxf sqlite*.tar.gz
 pushd sqlite*
 CFLAGS="-Os -fPIC -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DSQLITE_TCL=0"
