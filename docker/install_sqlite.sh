@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeo pipefail
 
-SQLITE_SHA256=1c76e25dc63d9f3935e0f406aec520a33ee77cf54ea5147dffe1fae8369eff68
-SQLITE_VERSION="3380000"
+SQLITE_SHA256=efb103ff4406a2217fa6147e8b88ba54f6c5582e83ef4ff2840be2b306d8172b
+SQLITE_VERSION="3380200"
 
 function check_sha256sum {
     local fname=$1
