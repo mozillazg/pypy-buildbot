@@ -36,6 +36,7 @@ AARCH64Lock = locks.MasterLock('aarch64_lock', maxCount=1)
 ARMCrossLock = locks.MasterLock('arm_cpu', maxCount=2)
 # while the boards can only run one job at the same time
 ARMBoardLock = locks.SlaveLock('arm_boards', maxCount=1)
+Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=1)
 
 map_branch_name = lambda x: x if x not in ['', None, 'default'] else 'trunk'
 

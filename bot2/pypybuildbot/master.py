@@ -100,6 +100,7 @@ WinSlaveLock = pypybuilds.WinSlaveLock
 #SpeedOldLock = pypybuilds.SpeedOldLock
 Bencher4Lock = pypybuilds.Bencher4Lock
 AARCH64Lock = pypybuilds.AARCH64Lock
+Salsa_m1_lock = pypybuilds.Salsa_m1_lock
 
 pypyOwnTestFactory = pypybuilds.Own()
 pypyOwnTestFactoryAarch64 = pypybuilds.Own(platform="aarch64")
@@ -249,6 +250,8 @@ AARCH64OWN = "own-linux-aarch64"
 LINUX_S390XOWN = "own-linux-s390x"
 WIN32OWN = "own-win-x86-32"
 WIN64OWN = "own-win-x86-64"
+MACOSX64OWN = "own-macosx-x86-64"
+MACOSARM64OWN = "own-macosx-arm64"
 
 LINUX32RPYTHON = "rpython-linux-x86-32"
 LINUX64RPYTHON = "rpython-linux-x86-64"
@@ -269,7 +272,7 @@ JITLINUX64 = "pypy-c-jit-linux-x86-64"
 JITAARCH64 = "pypy-c-jit-linux-aarch64"
 JITLINUX_S390X = 'pypy-c-jit-linux-s390x'
 JITMACOSX64 = "pypy-c-jit-macosx-x86-64"
-#JITMACOSX64_2 = "pypy-c-jit-macosx-x86-64-2"
+JITMACOSARM64 = "pypy-c-jit-macosx-arm64"
 JITWIN32 = "pypy-c-jit-win-x86-32"
 
 JITONLYLINUXPPC64 = "jitonly-own-linux-ppc-64"
@@ -345,20 +348,19 @@ BuildmasterConfig = {
             LINUX64OWN,                # on bencher4, uses all cores
             AARCH64OWN,
             WIN64OWN,                  # on SalsaSalsa
+            MACOSX64OWN,
+            MACOSARM64OWN,
             LINUX_S390XOWN,
             JITLINUX32,                # on benchmarker4_32, uses 1 core
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
             JITLINUX_S390X,
-            #APPLVLLINUX32,
-            #APPLVLLINUX64,             # on bencher4, uses 1 core
-            # other platforms
-            #MACOSX32,                 # on minime
             JITWIN64,                  # on SalsaSalsa
             #JITFREEBSD764,
             #JITFREEBSD864,
             #JITFREEBSD964,
-            JITMACOSX64,               # on xerxes
+            JITMACOSX64,
+            JITMACOSARM64,
             # buildbot selftest
             #PYPYBUILDBOT,
             ], branch='default', hour=0, minute=0,
@@ -408,7 +410,10 @@ BuildmasterConfig = {
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
             JITMACOSX64,               # on xerxes
+            JITMACOSARM64,
             WIN64OWN,                  # on SalsaSalsa
+            MACOSX64OWN,
+            MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
             JITLINUX_S390X,
             ], branch="py3.8", hour=1, minute=30,
@@ -422,8 +427,11 @@ BuildmasterConfig = {
             AARCH64OWN,
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
-            JITMACOSX64,               # on xerxes
+            JITMACOSX64,
+            JITMACOSARM64,
             WIN64OWN,                  # on SalsaSalsa
+            MACOSX64OWN,
+            MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
             JITLINUX_S390X,
             ], branch="py3.9", hour=3, minute=30,
@@ -459,6 +467,7 @@ BuildmasterConfig = {
                         JITLINUX64,
                         JITAARCH64,
                         JITMACOSX64,
+                        JITMACOSARM64,
                         JITWIN32,
                         #JITFREEBSD964,
 
@@ -466,6 +475,8 @@ BuildmasterConfig = {
                         NUMPY_64,
                         NUMPY_WIN,
                         WIN64OWN,
+                        MACOSX64OWN,
+                        MACOSARM64OWN,
                         #JITMACOSX64_2,
                         JITWIN64,
                         #JITFREEBSD764,
@@ -506,6 +517,20 @@ BuildmasterConfig = {
                    "factory": pypyOwnTestFactory,
                    "category": 'linux64',
                    "locks": [Bencher4Lock.access('counting')],
+                  },
+                  {"name": MACOSX64OWN,
+                   "slavenames": ["salsa-m1-x86_64"],
+                   "builddir": MACOSX64OWN,
+                   "factory": pypyOwnTestFactory,
+                   "category": 'macos-x86_64',
+                   "locks": [Salsa_m1_lock.access('counting')],
+                  },
+                  {"name": MACOSARM64OWN,
+                   "slavenames": ["salsa-m1-arm64", ],
+                   "builddir": MACOSARM64OWN,
+                   "factory": pypyOwnTestFactory,
+                   "category": 'macos-arm64',
+                   "locks": [Salsa_m1_lock.access('counting')],
                   },
                   {"name": AARCH64OWN,
                    "slavenames": ["aarch64"],
@@ -599,10 +624,20 @@ BuildmasterConfig = {
                     "locks": [BenchmarkerLock.access('exclusive')],
                     },
                   {"name" : JITMACOSX64,
-                   "slavenames": ["rebuy-de", "tosh", "osx-10.9-x64-dw", "billenstein-sierra"],  # "xerxes"
+                   "slavenames": ["rebuy-de", "tosh", "osx-10.9-x64-dw",
+                                  "billenstein-sierra", "salsa-m1-x86_64",
+                                 ],
                    'builddir' : JITMACOSX64,
                    'factory' : pypyJITTranslatedTestFactoryOSX64,
-                   'category' : 'mac64',
+                   'category' : 'macos-x86_64',
+                   "locks": [Salsa_m1_lock.access('counting')],
+                   },
+                  {"name" : JITMACOSARM64,
+                   "slavenames": ["salsa-m1-arm64", ],
+                   'builddir' : JITMACOSARM64,
+                   'factory' : pypyJITTranslatedTestFactoryOSX64,
+                   'category' : 'macos-arm64',
+                   "locks": [Salsa_m1_lock.access('counting')],
                    },
                   #{"name" : JITMACOSX64_2,
                   # "slavenames": ["rebuy-de", "xerxes", "tosh"],
