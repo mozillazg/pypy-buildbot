@@ -176,8 +176,17 @@ pypyJITTranslatedTestFactoryOSX = pypybuilds.Translated(
     interpreter='python',
     )
 
-pypyJITTranslatedTestFactoryOSX64 = pypybuilds.Translated(
-    platform='osx64',
+pypyJITTranslatedTestFactoryMACOSX_X86_64 = pypybuilds.Translated(
+    platform='macosx_x86_64',
+    translationArgs=jit_translation_args,
+    targetArgs=[],
+    lib_python=True,
+    pypyjit=True,
+    app_tests=True,
+    )
+
+pypyJITTranslatedTestFactoryMACOSX_ARM64 = pypybuilds.Translated(
+    platform='macosx_arm64',
     translationArgs=jit_translation_args,
     targetArgs=[],
     lib_python=True,
@@ -628,23 +637,17 @@ BuildmasterConfig = {
                                   "billenstein-sierra", "salsa-m1-x86_64",
                                  ],
                    'builddir' : JITMACOSX64,
-                   'factory' : pypyJITTranslatedTestFactoryOSX64,
+                   'factory' : pypyJITTranslatedTestFactoryMACOSX_X86_64,
                    'category' : 'macos-x86_64',
                    "locks": [Salsa_m1_lock.access('counting')],
                    },
                   {"name" : JITMACOSARM64,
                    "slavenames": ["salsa-m1-arm64", ],
                    'builddir' : JITMACOSARM64,
-                   'factory' : pypyJITTranslatedTestFactoryOSX64,
+                   'factory' : pypyJITTranslatedTestFactoryMACOSX_ARM64,
                    'category' : 'macos-arm64',
                    "locks": [Salsa_m1_lock.access('counting')],
                    },
-                  #{"name" : JITMACOSX64_2,
-                  # "slavenames": ["rebuy-de", "xerxes", "tosh"],
-                  # 'builddir' : JITMACOSX64_2,
-                  # 'factory' : pypyJITTranslatedTestFactoryOSX64,
-                  # 'category' : 'mac64',
-                  # },
 
                   # Windows
                   {"name": WIN32OWN,
