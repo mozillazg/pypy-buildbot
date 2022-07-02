@@ -268,6 +268,8 @@ AARCH64RPYTHON = "rpython-linux-aarch64"
 LINUX_S390XRPYTHON = "rpython-linux-s390x"
 WIN32RPYTHON = "rpython-win-x86-32"
 WIN64RPYTHON = "rpython-win-x86-64"
+MACOSX64RPYTHON = "rpython-macosx-x86-64"
+MACOSARM64RPYTHON = "rpython-macosx-arm64"
 
 APPLVLLINUX32 = "pypy-c-app-level-linux-x86-32"
 APPLVLLINUX64 = "pypy-c-app-level-linux-x86-64"
@@ -382,6 +384,8 @@ BuildmasterConfig = {
             AARCH64RPYTHON,
             WIN64RPYTHON,              # on SalsaSalsa
             LINUX_S390XRPYTHON,
+            MACOSARM64RPYTHON,
+            MACOSX64RPYTHON,
             ], branch='default', hour=1, minute=0, onlyIfChanged=True,
             fileIsImportant=isRPython,
             change_filter=filter.ChangeFilter(branch='default'),
@@ -464,6 +468,8 @@ BuildmasterConfig = {
                         AARCH64RPYTHON,
                         WIN32RPYTHON,
                         WIN64RPYTHON,
+                        MACOSARM64RPYTHON,
+                        MACOSX64RPYTHON,
 
                         APPLVLLINUX32,
                         APPLVLLINUX64,
@@ -538,6 +544,20 @@ BuildmasterConfig = {
                    "slavenames": ["salsa-m1-arm64", ],
                    "builddir": MACOSARM64OWN,
                    "factory": pypyOwnTestFactory,
+                   "category": 'macos-arm64',
+                   "locks": [Salsa_m1_lock.access('counting')],
+                  },
+                  {"name": MACOSX64RPYTHON,
+                   "slavenames": ["salsa-m1-x86_64"],
+                   "builddir": MACOSX64RPYTHON,
+                   "factory": pypyRPythonTestFactory,
+                   "category": 'macos-x86_64',
+                   "locks": [Salsa_m1_lock.access('counting')],
+                  },
+                  {"name": MACOSARM64RPYTHON,
+                   "slavenames": ["salsa-m1-arm64", ],
+                   "builddir": MACOSARM64RPYTHON,
+                   "factory": pypyRPythonTestFactory,
                    "category": 'macos-arm64',
                    "locks": [Salsa_m1_lock.access('counting')],
                   },
