@@ -108,7 +108,7 @@ def load_BuildmasterConfig():
 def test_builder_names():
     BuildmasterConfig = load_BuildmasterConfig()
     builders = [b['name'] for b in BuildmasterConfig['builders']]
-    known_exceptions = set(['pypy-c-jit-macosx-x86-32'])
+    known_exceptions = set(['pypy-c-jit-macos-x86-64'])
     def check_builder_names(t, expected_own, expected_app):
         own, app = t.get_builder_names()
         assert own == expected_own
@@ -123,7 +123,7 @@ def test_builder_names():
     check_builder_names(t, 'own-linux-x86-32', 'pypy-c-app-level-linux-x86-32')
 
     t = PyPyTarball('pypy-c-jit-76867-osx.tar.bz2')
-    check_builder_names(t, 'own-macosx-x86-32', 'pypy-c-jit-macosx-x86-32')
+    check_builder_names(t, 'own-macos-x86-64', 'pypy-c-jit-macos-x86-64')
 
     t = PyPyTarball('pypy-c-jit-76867-linux64.tar.bz2')
     check_builder_names(t, 'own-linux-x86-64', 'pypy-c-jit-linux-x86-64')
