@@ -422,7 +422,7 @@ BuildmasterConfig = {
             AARCH64OWN,
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
-            JITMACOSX64,               # on xerxes
+            JITMACOS64,               # on xerxes
             JITMACOSARM64,
             WIN64OWN,                  # on SalsaSalsa
             MACOS64OWN,
