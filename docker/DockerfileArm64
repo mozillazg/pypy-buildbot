@@ -104,7 +104,7 @@ RUN find /usr/local -type d -exec chmod a+x "{}" ";"
 ENV PATH=/python27_virt/bin:$PATH
 RUN pip install --upgrade pip==20.3.4
 RUN pip install --upgrade setuptools
-RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial virtualenv pexpect
+RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial=6.1 virtualenv pexpect
 RUN pip install git+https://github.com/vmprof/vmprof-python.git
 # Since we are running as root, make sure the buildslave user has access
 # Not sure why this is needed, but :shrug:
