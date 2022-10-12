@@ -9,7 +9,7 @@ function check_sha256sum {
     rm "${fname}.sha256"
 }
 
-wget https://github.com/libexpat/libexpat/releases/download/R_2_4_7/expat-2.4.7.tar.gz
+wget https://github.com/libexpat/libexpat/releases/download/R_2_4_9/expat-2.4.9.tar.gz
 tar zxf expat*.tar.gz
 pushd expat*
 CONFIGURE_PRE="--prefix=/usr/local --enable-shared=yes --enable-static=yes --disable-dependency-tracking"
