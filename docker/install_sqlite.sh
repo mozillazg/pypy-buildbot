@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeo pipefail
 
-SQLITE_SHA3=efb103ff4406a2217fa6147e8b88ba54f6c5582e83ef4ff2840be2b306d8172b
-SQLITE_VERSION="3380200"
+SQLITE_SHA3=431328e30d12c551da9ba7ef2122b269076058512014afa799caaf62ca567090
+SQLITE_VERSION="3390400"
 
 function check_sha3 {
     local fname=$1
