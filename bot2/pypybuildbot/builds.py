@@ -544,7 +544,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             description="Run extra tests",
             command=prefix + [virt_pypy, '-m', 'pytest',
                 '../build/extra_tests', '--resultlog=extra.log',
-                '--durations=20'],
+                '--durations=20 -raw'],
             logfiles={'pytestLog': 'extra.log'},
             workdir='venv',
         ))
