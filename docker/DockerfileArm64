@@ -104,7 +104,10 @@ RUN find /usr/local -type d -exec chmod a+x "{}" ";"
 ENV PATH=/python27_virt/bin:$PATH
 RUN pip install --upgrade pip==20.3.4
 RUN pip install --upgrade setuptools
-RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial==6.1 virtualenv pexpect automat==20.2
+RUN pip install --no-build-isolation pytest hypothesis==4.42 cffi mercurial==6.1 virtualenv pexpect automat==20.2 incremental==21.3.0
+# Twisted has no wheel for aarch64 on python2.7, building it requires that we
+# use the packages above
+RUN pip install --no-build-isolation buildbot-slave
 RUN pip install git+https://github.com/vmprof/vmprof-python.git
 # Since we are running as root, make sure the buildslave user has access
 # Not sure why this is needed, but :shrug:
