@@ -44,7 +44,7 @@ class PyPyTarball(object):
         'linux':     'linux-x86-32',
         'linux64':   'linux-x86-64',
         'aarch64':   'linux-aarch64',
-        'macosx_86_64': 'macos-x86-64',
+        'macos_86_64': 'macos-x86-64',
         'macos_arm64': 'macos-arm64',
         'win32':     'win-x86-32',
         'win64':     'win-x86-64',
