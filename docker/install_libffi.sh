@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeo pipefail
 
-LIBFFI_SHA256="d06ebb8e1d9a22d19e38d63fdb83954253f39bedc5d46232a05645685722ca37"
-LIBFFI_VERSION="3.2.1"
+LIBFFI_SHA256="d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676"
+LIBFFI_VERSION="3.4.4"
 
 function check_sha256sum {
     local fname=$1
