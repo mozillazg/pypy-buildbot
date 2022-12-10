@@ -31,7 +31,7 @@ class PyPyTarball(object):
         'linux':     50,
         'aarch64':   40,
         'macos_arm64': 31,
-        'macos_x86_64': 30,
+        'macos_86_64': 30,
         'win64':     21,
         'win32':     20,
         's390x':     10,
