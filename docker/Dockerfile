@@ -104,8 +104,8 @@ RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial==6.1 virtu
 # RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
-RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.6-linux64.tar.bz2 -O - | tar -C /opt -xj
-RUN ln -s /opt/pypy2.7-v7.3.6-linux64/bin/pypy /usr/local/bin/pypy
+RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.10-linux64.tar.bz2 -O - | tar -C /opt -xj
+RUN ln -s /opt/pypy2.7-v7.3.10-linux64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel

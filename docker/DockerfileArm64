@@ -116,8 +116,8 @@ RUN chmod a+x -R /python27_virt/bin
 RUN find /python27_virt -type d -exec chmod a+x "{}" ";"
 
 # get a pypy for translation.
-RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.6-aarch64.tar.bz2 -O - | tar -C /opt -xj
-RUN ln -s /opt/pypy2.7-v7.3.6-aarch64/bin/pypy /usr/local/bin/pypy
+RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.10-aarch64.tar.bz2 -O - | tar -C /opt -xj
+RUN ln -s /opt/pypy2.7-v7.3.10-aarch64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
