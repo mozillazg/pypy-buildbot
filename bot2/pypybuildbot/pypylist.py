@@ -199,7 +199,7 @@ class PyPyDirectoryLister(DirectoryLister):
         f = py.path.local(self.path).join(filename)
         date = datetime.date.fromtimestamp(f.mtime())
         element['date'] = date.isoformat()
-        t = PyPyTarball(filename)
+        t = PyPyTarball(filename, self.path)
         if t.display_in_italic():
             element['text'] = '<i>%s</i>' % (element['text'],)
         own_builder, app_builder = t.get_builder_names()
