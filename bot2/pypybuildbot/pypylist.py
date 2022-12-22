@@ -44,7 +44,7 @@ class PyPyTarball(object):
         'linux':     'linux-x86-32',
         'linux64':   'linux-x86-64',
         'aarch64':   'linux-aarch64',
-        'macos_86_64': 'macos-x86-64',
+        'macos_x86_64': 'macos-x86-64',
         'macos_arm64': 'macos-arm64',
         'win32':     'win-x86-32',
         'win64':     'win-x86-64',
@@ -58,7 +58,7 @@ class PyPyTarball(object):
         'stackless': 'stackless-app-level',
         }
 
-    def __init__(self, filename):
+    def __init__(self, filename, dirname):
         self.filename = filename
         try:
             self.parse_filename()
@@ -70,6 +70,11 @@ class PyPyTarball(object):
             self.rev = -1
             self.numrev = -1
             self.platform = None
+        dd = py.path.local(dirname).join(filename)
+        if dd.exists():
+            self.date = datetime.date.fromtimestamp(dd.mtime())
+        else:
+            self.date = datetime.date(2000, 1, 1)
 
     def parse_filename(self):
         for ext in ['.tar.bz2', '.zip']:
@@ -104,6 +109,7 @@ class PyPyTarball(object):
 
     def key(self):
         return (self.VCS_PRIORITY.get(self.vcs, -1),
+                self.date,
                 self.numrev,
                 self.FEATURES_PRIORITY.get(self.features, -1),
                 self.PLATFORM_PRIORITY.get(self.platform, -1))
@@ -135,8 +141,8 @@ class PyPyDirectory(object):
 
 class PyPyList(File):
 
-    def sortBuildNames(self, names):
-        items = map(PyPyTarball, names)
+    def sortBuildNames(self, names, dirname):
+        items = [PyPyTarball(name, dirname) for name in names]
         items.sort(key=PyPyTarball.key, reverse=True)
         return [item.filename for item in items]
 
@@ -153,7 +159,7 @@ class PyPyList(File):
             return False
         names = File.listNames(self)
         if is_pypy_dir(names):
-            names = self.sortBuildNames(names)
+            names = self.sortBuildNames(names, self.path)
         else:
             names = self.sortDirectoryNames(File.listEntities(self))
         Listener = PyPyDirectoryLister

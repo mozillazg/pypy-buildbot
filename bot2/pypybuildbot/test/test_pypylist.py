@@ -2,7 +2,7 @@ import py
 from pypybuildbot.pypylist import PyPyTarball, PyPyList
 
 def test_pypytarball_svn():
-    t = PyPyTarball('pypy-c-jit-75654-linux.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-75654-linux.tar.bz2', '.')
     assert t.filename == 'pypy-c-jit-75654-linux.tar.bz2'
     assert t.exe == 'pypy'
     assert t.backend == 'c'
@@ -14,7 +14,7 @@ def test_pypytarball_svn():
 
 
 def test_pypytarball_hg():
-    t = PyPyTarball('pypy-c-jit-75654-foo-linux.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-75654-foo-linux.tar.bz2', '.')
     assert t.filename == 'pypy-c-jit-75654-foo-linux.tar.bz2'
     assert t.exe == 'pypy'
     assert t.backend == 'c'
@@ -26,7 +26,7 @@ def test_pypytarball_hg():
 
 
 def test_invalid_filename():
-    t = PyPyTarball('foo')
+    t = PyPyTarball('foo', '.')
     assert t.vcs == None
     assert t.filename == 'foo'
     assert t.exe == None
@@ -34,7 +34,7 @@ def test_invalid_filename():
     assert t.features == None
     assert t.rev == -1
     assert t.platform == None
-    t2 = PyPyTarball('pypy-c-jit-75654-linux.tar.bz2')
+    t2 = PyPyTarball('pypy-c-jit-75654-linux.tar.bz2', '.')
     assert t.key() < t2.key()
 
 def test_sort(tmpdir):
@@ -54,8 +54,8 @@ def test_sort(tmpdir):
     assert listener.dirs == [
         'pypy-c-jit-1000-e5b73981fc8d-linux.tar.bz2', # mercurial first
         'pypy-c-jit-20000-linux.tar.bz2',
-        'pypy-c-jit-10000-linux.tar.bz2',
         'pypy-c-jit-10000-linux64.tar.bz2',
+        'pypy-c-jit-10000-linux.tar.bz2',
         'pypy-c-jit-10000-win32.tar.bz2',
         'pypy-c-jit-10000-linux-armel.tar.bz2',
         'pypy-c-nojit-10000-linux.tar.bz2',
@@ -116,20 +116,20 @@ def test_builder_names():
         assert own in builders or own in known_exceptions
         assert app in builders or app in known_exceptions
 
-    t = PyPyTarball('pypy-c-jit-76867-linux.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-76867-linux.tar.bz2', '.')
     check_builder_names(t, 'own-linux-x86-32', 'pypy-c-jit-linux-x86-32')
 
-    t = PyPyTarball('pypy-c-nojit-76867-linux.tar.bz2')
+    t = PyPyTarball('pypy-c-nojit-76867-linux.tar.bz2', '.')
     check_builder_names(t, 'own-linux-x86-32', 'pypy-c-app-level-linux-x86-32')
 
-    t = PyPyTarball('pypy-c-jit-76867-osx.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-76867-macos_x86_64.tar.bz2', '.')
     check_builder_names(t, 'own-macos-x86-64', 'pypy-c-jit-macos-x86-64')
 
-    t = PyPyTarball('pypy-c-jit-76867-linux64.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-76867-linux64.tar.bz2', '.')
     check_builder_names(t, 'own-linux-x86-64', 'pypy-c-jit-linux-x86-64')
 
-    t = PyPyTarball('pypy-c-jit-76867-win32.tar.bz2')
+    t = PyPyTarball('pypy-c-jit-76867-win32.tar.bz2', '.')
     check_builder_names(t, 'own-win-x86-32', 'pypy-c-jit-win-x86-32')
 
-    t = PyPyTarball('pypy-c-nojit-76867-linux64.tar.bz2')
+    t = PyPyTarball('pypy-c-nojit-76867-linux64.tar.bz2', '.')
     check_builder_names(t, 'own-linux-x86-64', 'pypy-c-app-level-linux-x86-64')
