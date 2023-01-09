@@ -343,7 +343,7 @@ BuildmasterConfig = {
         HgPoller('https://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
                  branch='default', pollinterval=20*60),
         HgPoller('http://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
-                 branch='py3.8', pollinterval=20*60+17),
+                 branch='py3.10', pollinterval=20*60+17),
         HgPoller('http://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
                  branch='py3.9', pollinterval=20*60+17),
         ],
@@ -415,7 +415,7 @@ BuildmasterConfig = {
             #NUMPY_WIN,                  # on SalsaSalsa
         ]),
 
-        Nightly("nightly-1-30-py3.8", [
+        Nightly("nightly-1-30-py3.10", [
             LINUX32OWN,                # on bencher4_32, uses all cores
             JITLINUX32,                # on bencher4_32, uses 1 core
             LINUX64OWN,                # on bencher4, uses all cores
@@ -429,7 +429,7 @@ BuildmasterConfig = {
             MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
             JITLINUX_S390X,
-            ], branch="py3.8", hour=1, minute=30,
+            ], branch="py3.10", hour=1, minute=30,
             onlyIfChanged=True
         ),
 
