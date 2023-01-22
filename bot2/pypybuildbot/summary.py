@@ -127,6 +127,36 @@ class RevisionOutcomeSet(object):
             longrepr = []
         add_one()
 
+    def populate_xml(self, log):
+        import xml.etree.ElementTree as ET
+        tree = ET.fromstring(log.getText())
+        for item in tree:
+            if item.tag != "testcase":
+                continue
+            failures = item.findall("failure")
+            skipped = item.findall("skipped")
+            errors = item.findall("error")
+            if errors:
+                longrepr = errors[0].text
+                kind = "E"
+            elif failures:
+                longrepr = failures[0].text
+                kind = "F"
+            elif skipped:
+                t = skipped[0].get("type", "")
+                if "xfail" in t:
+                    kind = 'x'
+                elif "xpass" in t:
+                    kind = "X"
+                else:
+                    kind = "s"
+                longrepr = skipped[0].get("message", "")
+            else:
+                kind = "."
+                longrepr = ""
+            name = " ".join([item.get("classname", ""), item.get("name", "")])
+            self.populate_one(name, kind, longrepr)
+
     def get_outcome(self, namekey):
         return self._outcomes.get(namekey, ' ')
 
@@ -189,8 +219,10 @@ class RevisionOutcomeSetCache(object):
         if pytest_logs:
             for stepName, resultLog in pytest_logs:
                 if resultLog.hasContents():
-                    #someresult = True
-                    outcome_set.populate(resultLog)
+                    if resultLog.getText().startswith("<?xml "):
+                        outcome_set.populate_xml(resultLog)
+                    else:
+                        outcome_set.populate(resultLog)
 
         failedtests = not not outcome_set.failed
 

@@ -1,6 +1,8 @@
 .. -*- mode: rst -*-
 
-Everything has been tested with builbot 0.8.8.
+Everything has been tested with builbot 0.8.8 on CPython2.7
+Note you must pin "automat==20.2" "incremental==21.3.0"
+Testing must use "pytest<4"
 
 How to hack the PyPy buildbot
 ==============================

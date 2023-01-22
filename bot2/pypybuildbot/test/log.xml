@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite errors="0" failures="1" name="pytest" skips="1" tests="14" time="5.314">
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="10" name="test_python3_missing_bchr" time="3.80272603035"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="45" name="test_lookup_default_encoding" time="0.125947237015"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="88" name="test_int_base_16" time="0.0552859306335"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="130" name="test_str_mod" time="0.0569581985474"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="183" name="test_remove_duplicate_method_calls_bytes" time="0.0536088943481"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="203" name="test_remove_duplicate_method_calls_unicode" time="0.0532379150391"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="227" name="test_move_method_call_out_of_loop" time="0.0515880584717">
+    <skipped message="expected test failure"/>
+    <system-out>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Loops don't match
+=================
+loop id = 'callone'
+('got more ops than expected',)
+&lt;could not determine information&gt;
+
+Ignore ops: []
+Got:
+
+	===== HERE =====
+    setfield_gc(p19, i65, descr=&lt;FieldS pypy.module.__builtin__.functional.W_IntRangeIterator.inst_current 8&gt;)
+    i66 = int_eq(i35, i61)
+    guard_true(i66, descr=&lt;Guard0x7f6de5067ac0&gt;)
+
+Expected:
+
+</system-out>
+  </testcase>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="247" name="test_lookup_codec" time="0.0498688220978"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="267" name="test_decode_ascii" time="0.0520160198212"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="295" name="test_unicode_indexing_makes_no_bridges" time="0.0474681854248"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="308" name="test_unicode_indexing_small_constant_indices" time="0.0504579544067"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="342" name="test_unicode_slicing_small_constant_indices" time="0.0570747852325"/>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="365" name="test_decode_encode" time="0.220892906189">
+    <failure message="InvalidMatch: got more ops than expected">self = &lt;pypy.module.pypyjit.test_pypy_c.test_string.TestString object at 0x7f68608eef10&gt;
+
+    def test_decode_encode(self):
+        log = self.run(r"""
+            def main(n):
+                global s
+                u = b'ab\xc3\xa4\xf0\x9f\x91\xa9\xe2\x80\x8d\xf0\x9f\x91\xa9\xe2\x80\x8d\xf0\x9f\x91\xa7\xe2\x80\x8d\xf0\x9f\x91\xa6'.decode("utf-8")
+                count = 0
+                for i in range(n):
+                    b = (u + str(i)).encode("utf-8")
+                    u = b.decode("utf-8") # ID: decode
+                    count += 1
+                return count
+            """, [10000])
+        loop, = log.loops_by_filename(self.filepath)
+        # No call to _check_utf8 is necessary, because the bytes come from
+        # W_UnicodeObject.utf8_w.
+        assert loop.match_by_id('decode', '''
+&gt;           ''')
+
+pypy/module/pypyjit/test_pypy_c/test_string.py:382: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+pypy/module/pypyjit/test_pypy_c/model.py:182: in match_by_id
+    return matcher.match(expected_src, ignore_ops=ignore_ops)
+pypy/module/pypyjit/test_pypy_c/model.py:524: in match
+    self.match_loop(expected_ops, ignore_ops)
+pypy/module/pypyjit/test_pypy_c/model.py:500: in match_loop
+    self.match_op(op, exp_op)
+pypy/module/pypyjit/test_pypy_c/model.py:406: in match_op
+    self._assert(op == '--end--', 'got more ops than expected')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;pypy.module.pypyjit.test_pypy_c.model.OpMatcher object at 0x7f6860437250&gt;, cond = False, message = 'got more ops than expected'
+
+    def _assert(self, cond, message):
+        if not cond:
+&gt;           raise InvalidMatch(message, frame=sys._getframe(1))
+E           InvalidMatch: got more ops than expected
+
+pypy/module/pypyjit/test_pypy_c/model.py:402: InvalidMatch</failure>
+    <system-out>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Loops don't match
+=================
+loop id = 'decode'
+('got more ops than expected',)
+&lt;could not determine information&gt;
+
+Ignore ops: []
+Got:
+
+	===== HERE =====
+    i91 = call_i(ConstClass(_check_utf8), p82, 0, 0, -1, descr=&lt;Calli 8 riii EF=4&gt;)
+    guard_no_exception(descr=&lt;Guard0x7f0c183b5fa0&gt;)
+    i93 = int_ge(i91, 0)
+    guard_true(i93, descr=&lt;Guard0x7f0c183b7850&gt;)
+
+Expected:
+
+</system-out>
+  </testcase>
+  <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="383" name="test_find" time="0.0485467910767"/>
+</testsuite>

@@ -464,6 +464,9 @@ class FakeLog(object):
     def isFinished(self):
         return True
 
+    def getText(self):
+        return self.cont
+
 def add_builds(builder, builds):
     n = getattr(builder, 'nextBuildNumber', 0)
     t = 1000
@@ -810,14 +813,14 @@ class TestSummary(object):
         s = summary.Summary(['foo', 'bar'],
                             ['trunk', 'release/', 'branch/'])
 
-        res = s._cat_branch_key(('foo', None))
-        assert res == (0, 'foo', 0)
+        res = s._cat_branch_key(('linux64', None))
+        assert res == (1, 'linux64', 0)
 
         res = s._cat_branch_key(('foo', 'trunk'))
-        assert res == (0, 'foo', 1, 'trunk')
+        assert res == (2, 'foo', 1, 'trunk')
 
         res = s._cat_branch_key(('bar', 'trunk'))
-        assert res == (1, 'bar', 1, 'trunk')
+        assert res == (2, 'bar', 1, 'trunk')
 
         res = s._cat_branch_key(('', 'trunk'))
         assert res == (2, '', 1, 'trunk')
@@ -851,7 +854,7 @@ class TestSummary(object):
         rel2 = out.index('TEST2')
         rel3 = out.index('TEST3')
 
-        assert rel3 > rel2 > rel1
+        assert rel3 < rel2 < rel1
 
         assert "{foo}" in out
         assert "{bar}" in out
@@ -895,7 +898,7 @@ class TestSummary(object):
         # pruning of builds older than 7 days
         assert '(29 Nov)' not in out
 
-    def test_fail_body(self):
+    def test_fail_body_txt(self):
         builder = status_builder.BuilderStatus('builder0', None, self.master, '')
         with open(os.path.dirname(__file__) + '/log.txt') as fid:
             log = fid.read()
@@ -916,6 +919,28 @@ class TestSummary(object):
         req.args['mod'] = [key[0]]
         req.args['testname'] = [key[1]]
         out = longrepr.body(req)
-        print out
-        assert False
+        assert "E           InvalidMatch: got more ops than expected" in out
+
+    def test_fail_body_xml(self):
+        builder = status_builder.BuilderStatus('builder0', None, self.master, '')
+        with open(os.path.dirname(__file__) + '/log.xml') as fid:
+            log = fid.read()
+        add_builds(builder, [(60000, log)])
+        #fail = list(rev_outcome_set.failed)[0]
+
+ 
+        req = FakeRequest([builder], {
+            'builder': ['builder0'],
+            'build': [0],
+            'mod': [0],
+            })
+        longrepr = summary.LongRepr()
+        outcome_set = summary.outcome_set_cache.get(
+                            longrepr.getStatus(req),
+                            ('builder0', 0))
+        key = list(outcome_set.failed)[0]
+        req.args['mod'] = [key[0]]
+        req.args['testname'] = [key[1]]
+        out = longrepr.body(req)
+        assert "E           InvalidMatch: got more ops than expected" in out
 
