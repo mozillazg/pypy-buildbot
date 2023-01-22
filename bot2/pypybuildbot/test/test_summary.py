@@ -918,29 +918,29 @@ class TestSummary(object):
         key = list(outcome_set.failed)[0]
         req.args['mod'] = [key[0]]
         req.args['testname'] = [key[1]]
-        out = longrepr.body(req)
-        assert "E           InvalidMatch: got more ops than expected" in out
+        out_txt = longrepr.body(req)
+        assert "E           InvalidMatch: got more ops than expected" in out_txt
 
     def test_fail_body_xml(self):
-        builder = status_builder.BuilderStatus('builder0', None, self.master, '')
+        builder = status_builder.BuilderStatus('builder1', None, self.master, '')
         with open(os.path.dirname(__file__) + '/log.xml') as fid:
             log = fid.read()
-        add_builds(builder, [(60000, log)])
+        add_builds(builder, [(70000, log)])
         #fail = list(rev_outcome_set.failed)[0]
 
  
         req = FakeRequest([builder], {
-            'builder': ['builder0'],
+            'builder': ['builder1'],
             'build': [0],
             'mod': [0],
             })
         longrepr = summary.LongRepr()
         outcome_set = summary.outcome_set_cache.get(
                             longrepr.getStatus(req),
-                            ('builder0', 0))
+                            ('builder1', 0))
         key = list(outcome_set.failed)[0]
         req.args['mod'] = [key[0]]
         req.args['testname'] = [key[1]]
-        out = longrepr.body(req)
-        assert "E           InvalidMatch: got more ops than expected" in out
+        out_xml = longrepr.body(req)
+        assert "E           InvalidMatch: got more ops than expected" in out_xml
 

@@ -130,6 +130,9 @@ class RevisionOutcomeSet(object):
     def populate_xml(self, log):
         import xml.etree.ElementTree as ET
         tree = ET.fromstring(log.getText())
+        if tree.tag != "testsuite":
+            # Could be a "testsuites" node around the "testsuite"
+            tree = tree.find("testsuite")
         for item in tree:
             if item.tag != "testcase":
                 continue
