@@ -157,7 +157,7 @@ class RevisionOutcomeSet(object):
             else:
                 kind = "."
                 longrepr = ""
-            name = " ".join([item.get("classname", ""), item.get("name", "")])
+            name = ":".join([item.get("classname", ""), item.get("name", "")])
             self.populate_one(name, kind, longrepr)
 
     def get_outcome(self, namekey):
