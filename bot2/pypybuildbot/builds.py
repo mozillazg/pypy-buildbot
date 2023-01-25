@@ -537,7 +537,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
         factory.addStep(PytestCmd(
             description="Run -D tests",
             command=prefix + [virt_pypy, '-m', 'pytest', '-D',
-                '../build/pypy', '--resultlog=test-D.log'],
+                '../build/pypy', '--junitxml=test-D.log'],
             logfiles={'pytestLog': 'test-D.log'},
             workdir='venv'))
         factory.addStep(PytestCmd(
