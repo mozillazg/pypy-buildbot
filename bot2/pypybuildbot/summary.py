@@ -140,10 +140,10 @@ class RevisionOutcomeSet(object):
             skipped = item.findall("skipped")
             errors = item.findall("error")
             if errors:
-                longrepr = errors[0].text
+                longrepr = errors[0].text.encode('utf-8')
                 kind = "E"
             elif failures:
-                longrepr = failures[0].text
+                longrepr = failures[0].text.encode('utf-8')
                 kind = "F"
             elif skipped:
                 t = skipped[0].get("type", "")

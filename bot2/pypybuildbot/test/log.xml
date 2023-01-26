@@ -94,4 +94,10 @@ Expected:
 </system-out>
   </testcase>
   <testcase classname="pypy.module.pypyjit.test_pypy_c.test_string.TestString" file="pypy/module/pypyjit/test_pypy_c/test_string.py" line="383" name="test_find" time="0.0485467910767"/>
+<testcase classname="pypy.objspace.std.test.apptest_stringformat" name="test_invalid_char" time="0.001"><failure message="TypeError: '&quot;%ሴ&quot; % (f,)' object (type: &lt;class 'str'&gt;) must be callable">def test_invalid_char():
+        f = 4
+&gt;       raises(ValueError, '"%\u1234" % (f,)')
+E       TypeError: '"%ሴ" % (f,)' object (type: &lt;class 'str'&gt;) must be callable
+
+../build/pypy/objspace/std/test/apptest_stringformat.py:414: TypeError</failure></testcase>
 </testsuite>
