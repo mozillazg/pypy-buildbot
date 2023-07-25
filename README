@@ -4,6 +4,11 @@ Everything has been tested with builbot 0.8.8 on CPython2.7
 Note you must pin "automat==20.2" "incremental==21.3.0"
 Testing must use "pytest<4"
 
+Patch the source
+================
+
+buildbot 0.8.8 is really old. There are some patches needed, see patches.patch
+
 How to hack the PyPy buildbot
 ==============================
 
