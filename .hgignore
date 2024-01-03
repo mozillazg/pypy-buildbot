@@ -39,6 +39,7 @@ http.log*
 *-win-x86-64
 *-aarch64
 *-s390x
+*-benchmark-linux-x86-64-single-run
 slave/pypy-buildbot
 master/pypy-buildbot
 *.swp
