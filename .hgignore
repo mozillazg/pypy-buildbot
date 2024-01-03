@@ -43,3 +43,4 @@ slave/pypy-buildbot
 master/pypy-buildbot
 *.swp
 master/state.sqlite
+gitpoller-workdir/

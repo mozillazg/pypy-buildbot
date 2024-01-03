@@ -225,14 +225,19 @@ class UpdateGitCheckout(ShellCmd):
 
 class CheckGotRevision(ShellCmd):
     description = 'got_revision'
-    command = ['hg', 'parents', '--template', 'got_revision:{rev}:{node}']
+    command = "git rev-list --count HEAD && git rev-parse --short=12 HEAD"
 
     def commandComplete(self, cmd):
         if cmd.rc == 0:
             got_revision = cmd.logs['stdio'].getText()
-            got_revision = got_revision.split('got_revision:')[-1]
+            got_revision = got_revision.replace("\n",":")
+            # Prefix the revisions with 1 since the move to git so sorting
+            # on the summary page still works
+            got_revision = "1" + got_revision
             # manually get the effect of {node|short} without using a
             # '|' in the command-line, because it doesn't work on Windows
+            #
+            # This is a noop since the move to git
             num = got_revision.find(':')
             if num > 0:
                 got_revision = got_revision[:num + 13]
@@ -380,7 +385,7 @@ def update_hg(platform, factory, repourl, workdir, revision, use_branch,
                 workdir=workdir,
                 logEnviron=False))
 
-def update_git(platform, factory, repourl, workdir, branch='master',
+def update_git(platform, factory, repourl, workdir, branch='main',
                alwaysUseLatest=False):
     factory.addStep(
             Git(
@@ -390,11 +395,12 @@ def update_git(platform, factory, repourl, workdir, branch='master',
                 workdir=workdir,
                 branch=branch,
                 alwaysUseLatest=alwaysUseLatest,
+                timeout=40*60,
                 logEnviron=False))
 
 
 def setup_steps(platform, factory, workdir=None,
-                repourl='https://foss.heptapod.net/pypy/pypy/',
+                repourl='https://github.com/pypy/pypy/',
                 force_branch=None):
     factory.addStep(shell.SetPropertyFromCommand(
             command=['python', '-c', "import tempfile, os ;print"
@@ -417,8 +423,9 @@ def setup_steps(platform, factory, workdir=None,
                                   doStepIf=ParseRevision.doStepIf))
     #
     revision=WithProperties("%(revision)s")
-    update_hg(platform, factory, repourl, workdir, revision, use_branch=True,
-              force_branch=force_branch, wipe_bookmarks=True)
+    # update_hg(platform, factory, repourl, workdir, revision, use_branch=True,
+    #          force_branch=force_branch, wipe_bookmarks=True)
+    update_git(platform, factory, repourl, workdir, branch=force_branch)
     #
     factory.addStep(CheckGotRevision(workdir=workdir))
 

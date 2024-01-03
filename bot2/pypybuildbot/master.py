@@ -13,7 +13,7 @@ from pypybuildbot.pypylist import PyPyList, NumpyStatusList, ReleaseList
 from pypybuildbot.ircbot import IRC  # side effects
 from pypybuildbot.util import we_are_debugging, isRPython
 from buildbot.changes import filter
-from buildbot.changes.hgpoller import HgPoller
+from buildbot.changes.gitpoller import GitPoller
 from twisted.web.static import File
 
 # Forbid "force build" with empty user name
@@ -333,18 +333,15 @@ BuildmasterConfig = {
 
     'change_source': [
         # For now, you should list here the branches on which the various Nightly run.
-        # This should be fixed more properly in the next revision of heptapod.
-        # These HgPollers are used to get the revision at the head in these branches
+        # These Pollers are used to get the revision at the head in these branches
         # and then the nightly schedulers use them.  We see them in the build pages
         # in the "Revision" property.  Any build with such a "Revision" property will
         # use exactly that revision (at least in our nightly builds).
-        # NOTE obscure hack: we can't give the exact same URL to both, so we use
-        # small variants
-        HgPoller('https://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
-                 branch='default', pollinterval=20*60),
-        HgPoller('http://foss.heptapod.net/pypy/pypy', workdir='hgpoller-workdir',
-                 branch='py3.10', pollinterval=20*60+17),
-        HgPoller('http://foss.heptapod.net/pypy/pypy/', workdir='hgpoller-workdir',
+        GitPoller('https://github.com/pypy/pypy', workdir='gitpoller-workdir',
+                 branch='main', pollinterval=20*60),
+        GitPoller('http://github.com/pypy/pypy/', workdir='gitpoller-workdir',
+                 branch='py3.10', pollinterval=20*60+11),
+        GitPoller('http://github.com/pypy/pypy.git', workdir='gitpoller-workdir',
                  branch='py3.9', pollinterval=20*60+17),
         ],
 
