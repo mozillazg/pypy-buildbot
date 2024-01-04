@@ -337,12 +337,8 @@ BuildmasterConfig = {
         # and then the nightly schedulers use them.  We see them in the build pages
         # in the "Revision" property.  Any build with such a "Revision" property will
         # use exactly that revision (at least in our nightly builds).
-        GitPoller('https://github.com/pypy/pypy', workdir='gitpoller-workdir',
-                 branch='main', pollinterval=20*60),
-        GitPoller('http://github.com/pypy/pypy/', workdir='gitpoller-workdir',
-                 branch='py3.10', pollinterval=20*60+11),
-        GitPoller('http://github.com/pypy/pypy.git', workdir='gitpoller-workdir',
-                 branch='py3.9', pollinterval=20*60+17),
+        GitPoller('/home/matti/oss/pypy-git', workdir='gitpoller-workdir',
+                 branches=['main','py3.9', 'py3.10'], pollinterval=10),
         ],
 
     'schedulers': [
