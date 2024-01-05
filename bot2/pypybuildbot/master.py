@@ -34,7 +34,7 @@ class BenchmarkForceScheduler(CustomForceScheduler):
     def __init__(self, name, builderNames,
             benchmark_branch=StringParameter(name="benchmark_branch",
                                              label="Benchmark repo branch:",
-                                             default="main", length=20),
+                                             default="default", length=20),
             properties=[ CodebaseParameter('PyPy repo', label='PyPy Repo')],
             **kwargs):
         CustomForceScheduler.__init__(self, name, builderNames, **kwargs)
