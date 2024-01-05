@@ -129,7 +129,7 @@ schedulers = [
         #BUILDLINUXARM,                 # on hhu-cross-armel, uses 1 core
         #BUILDLINUXARMHF_RASPBIAN,      # on hhu-cross-raspbianhf, uses 1 core
 
-        ], branch='default', hour=0, minute=0,
+        ], branch='main', hour=0, minute=0,
         onlyIfChanged=True,
     ),
 
@@ -144,9 +144,9 @@ schedulers = [
         # JITBACKENDONLYLINUXARMEL,      # on hhu-imx.53
         JITBACKENDONLYLINUXARMHF,
         JITBACKENDONLYLINUXARMHF_v7,   # on cubieboard-bob
-        ], branch='default', hour=0, minute=0, onlyIfChanged=True,
+        ], branch='main', hour=0, minute=0, onlyIfChanged=True,
         fileIsImportant=isRPython,
-        change_filter=filter.ChangeFilter(branch='default'),
+        change_filter=filter.ChangeFilter(branch='main'),
     ),
 
     #Triggerable("APPLVLLINUXARM_scheduler", [

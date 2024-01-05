@@ -34,7 +34,7 @@ class BenchmarkForceScheduler(CustomForceScheduler):
     def __init__(self, name, builderNames,
             benchmark_branch=StringParameter(name="benchmark_branch",
                                              label="Benchmark repo branch:",
-                                             default="default", length=20),
+                                             default="main", length=20),
             properties=[ CodebaseParameter('PyPy repo', label='PyPy Repo')],
             **kwargs):
         CustomForceScheduler.__init__(self, name, builderNames, **kwargs)
@@ -367,7 +367,7 @@ BuildmasterConfig = {
             JITMACOSARM64,
             # buildbot selftest
             #PYPYBUILDBOT,
-            ], branch='default', hour=0, minute=0,
+            ], branch='main', hour=0, minute=0,
             onlyIfChanged=True,
         ),
 
@@ -379,16 +379,16 @@ BuildmasterConfig = {
             LINUX_S390XRPYTHON,
             MACOSARM64RPYTHON,
             MACOS64RPYTHON,
-            ], branch='default', hour=1, minute=0, onlyIfChanged=True,
+            ], branch='main', hour=1, minute=0, onlyIfChanged=True,
             fileIsImportant=isRPython,
-            change_filter=filter.ChangeFilter(branch='default'),
+            change_filter=filter.ChangeFilter(branch='main'),
         ),
 
         Nightly("nightly-1-00", [
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
-            ], branch='default', hour=7, minute=0,
+            ], branch='main', hour=7, minute=0,
             onlyIfChanged=True,
         ),
 
