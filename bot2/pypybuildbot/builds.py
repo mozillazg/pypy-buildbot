@@ -38,7 +38,7 @@ ARMCrossLock = locks.MasterLock('arm_cpu', maxCount=2)
 ARMBoardLock = locks.SlaveLock('arm_boards', maxCount=1)
 Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=2)
 
-map_branch_name = lambda x: x if x not in ['', None, 'default', 'main'] else 'trunk'
+map_branch_name = lambda x: 'main' if x in ['', None, 'default'] else x
 
 class ShellCmd(shell.ShellCommand):
     # our own version that can distinguish abort cases (rc == -1)
