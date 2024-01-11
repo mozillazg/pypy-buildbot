@@ -131,7 +131,7 @@ class PyPyDirectory(object):
         self.parse_filename()
 
     def parse_filename(self):
-        if self.filename == 'trunk':
+        if self.filename in ('trunk', 'main'):
             self.last_mod_time = sys.maxsize
             return
         self.last_mod_time = self.filePath.getModificationTime()
