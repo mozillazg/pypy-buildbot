@@ -108,7 +108,7 @@ RUN pip install --no-build-isolation pytest hypothesis==4.42 cffi mercurial==6.1
 # Twisted has no wheel for aarch64 on python2.7, building it requires that we
 # use the packages above
 RUN pip install --no-build-isolation buildbot-slave
-RUN pip install git+https://github.com/vmprof/vmprof-python.git
+RUN pip install git+https://github.com/vmprof/vmprof-python.git@e32f37b
 # Since we are running as root, make sure the buildslave user has access
 # Not sure why this is needed, but :shrug:
 RUN chmod a+r -R /python27_virt
@@ -129,6 +129,7 @@ RUN adduser buildslave --uid=$BUILDSLAVE_UID
 RUN echo parallel_runs=$PARALLEL_BUILDS > /home/buildslave/machine_cfg.py
 RUN chown buildslave.buildslave /home/buildslave/machine_cfg.py
 ENV PYPY_LOCALBASE=/usr/local
+ENV PYPY_GC_NURSERY=16M
 
 # NOTE: always use
 # su buildslave
