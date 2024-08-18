@@ -256,8 +256,8 @@ pypyNumpyCompatabilityWin = pypybuilds.NativeNumpyTests(platform='win32')
 LINUX32OWN = "own-linux-x86-32"
 LINUX64OWN = "own-linux-x86-64"
 AARCH64OWN = "own-linux-aarch64"
-LINUX_S390XOWN = "own-linux-s390x"
-WIN32OWN = "own-win-x86-32"
+# LINUX_S390XOWN = "own-linux-s390x"
+# WIN32OWN = "own-win-x86-32"
 WIN64OWN = "own-win-x86-64"
 MACOS64OWN = "own-macos-x86-64"
 MACOSARM64OWN = "own-macos-arm64"
@@ -265,35 +265,35 @@ MACOSARM64OWN = "own-macos-arm64"
 LINUX32RPYTHON = "rpython-linux-x86-32"
 LINUX64RPYTHON = "rpython-linux-x86-64"
 AARCH64RPYTHON = "rpython-linux-aarch64"
-LINUX_S390XRPYTHON = "rpython-linux-s390x"
-WIN32RPYTHON = "rpython-win-x86-32"
+# LINUX_S390XRPYTHON = "rpython-linux-s390x"
+# WIN32RPYTHON = "rpython-win-x86-32"
 WIN64RPYTHON = "rpython-win-x86-64"
 MACOS64RPYTHON = "rpython-macos-x86-64"
 MACOSARM64RPYTHON = "rpython-macos-arm64"
 
-APPLVLLINUX32 = "pypy-c-app-level-linux-x86-32"
-APPLVLLINUX64 = "pypy-c-app-level-linux-x86-64"
-APPLVLWIN32 = "pypy-c-app-level-win-x86-32"
+#APPLVLLINUX32 = "pypy-c-app-level-linux-x86-32"
+#APPLVLLINUX64 = "pypy-c-app-level-linux-x86-64"
+#APPLVLWIN32 = "pypy-c-app-level-win-x86-32"
 
-LIBPYTHON_LINUX32 = "pypy-c-lib-python-linux-x86-32"
-LIBPYTHON_LINUX64 = "pypy-c-lib-python-linux-x86-64"
+#LIBPYTHON_LINUX32 = "pypy-c-lib-python-linux-x86-32"
+#LIBPYTHON_LINUX64 = "pypy-c-lib-python-linux-x86-64"
 
 JITLINUX32 = "pypy-c-jit-linux-x86-32"
 JITLINUX64 = "pypy-c-jit-linux-x86-64"
 JITAARCH64 = "pypy-c-jit-linux-aarch64"
-JITLINUX_S390X = 'pypy-c-jit-linux-s390x'
+# JITLINUX_S390X = 'pypy-c-jit-linux-s390x'
 JITMACOS64 = "pypy-c-jit-macos-x86-64"
 JITMACOSARM64 = "pypy-c-jit-macos-arm64"
-JITWIN32 = "pypy-c-jit-win-x86-32"
+# JITWIN32 = "pypy-c-jit-win-x86-32"
 
-JITONLYLINUXPPC64 = "jitonly-own-linux-ppc-64"
+# JITONLYLINUXPPC64 = "jitonly-own-linux-ppc-64"
 JITBENCH64 = "jit-benchmark-linux-x86-64"
 CPYTHON_64 = "cpython-2-benchmark-x86-64"
-NUMPY_64 = "numpy-compatibility-linux-x86-64"
-NUMPY_WIN = "numpy-compatibility-win-x86-32"
+#NUMPY_64 = "numpy-compatibility-linux-x86-64"
+#NUMPY_WIN = "numpy-compatibility-win-x86-32"
 
 # buildbot builder
-PYPYBUILDBOT = 'pypy-buildbot'
+# PYPYBUILDBOT = 'pypy-buildbot'
 JITFREEBSD964 = 'pypy-c-jit-freebsd-9-x86-64'
 
 JITWIN64 = "pypy-c-jit-win-x86-64"
@@ -354,11 +354,11 @@ BuildmasterConfig = {
             WIN64OWN,                  # on SalsaSalsa
             MACOS64OWN,
             MACOSARM64OWN,
-            LINUX_S390XOWN,
+            # LINUX_S390XOWN,
             JITLINUX32,                # on benchmarker4_32, uses 1 core
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
-            JITLINUX_S390X,
+            # JITLINUX_S390X,
             JITWIN64,                  # on SalsaSalsa
             #JITFREEBSD764,
             #JITFREEBSD864,
@@ -376,7 +376,7 @@ BuildmasterConfig = {
             LINUX64RPYTHON,            # on bencher4, uses all cores
             AARCH64RPYTHON,
             WIN64RPYTHON,              # on SalsaSalsa
-            LINUX_S390XRPYTHON,
+            # LINUX_S390XRPYTHON,
             MACOSARM64RPYTHON,
             MACOS64RPYTHON,
             ], branch='main', hour=1, minute=0, onlyIfChanged=True,
@@ -397,6 +397,14 @@ BuildmasterConfig = {
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
             ], branch='py3.9', hour=11, minute=0,
+            onlyIfChanged=True,
+        ),
+
+        Nightly("nightly-1-03", [
+            JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
+            #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
+
+            ], branch='py3.10', hour=14, minute=0,
             onlyIfChanged=True,
         ),
 
@@ -421,7 +429,7 @@ BuildmasterConfig = {
             MACOS64OWN,
             MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
-            JITLINUX_S390X,
+            # JITLINUX_S390X,
             ], branch="py3.10", hour=1, minute=30,
             onlyIfChanged=True
         ),
@@ -439,7 +447,7 @@ BuildmasterConfig = {
             MACOS64OWN,
             MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
-            JITLINUX_S390X,
+            # JITLINUX_S390X,
             ], branch="py3.9", hour=3, minute=30,
             onlyIfChanged=True 
         ),
@@ -451,22 +459,22 @@ BuildmasterConfig = {
                     ], properties=[]),
         CustomForceScheduler('Force Build',
             builderNames=[
-                        PYPYBUILDBOT,
+                        # PYPYBUILDBOT,
                         LINUX32OWN,
                         LINUX64OWN,
                         AARCH64OWN,
-                        WIN32OWN,
+                        # WIN32OWN,
                         LINUX32RPYTHON,
                         LINUX64RPYTHON,
                         AARCH64RPYTHON,
-                        WIN32RPYTHON,
+                        # WIN32RPYTHON,
                         WIN64RPYTHON,
                         MACOSARM64RPYTHON,
                         MACOS64RPYTHON,
 
-                        APPLVLLINUX32,
-                        APPLVLLINUX64,
-                        APPLVLWIN32,
+                        # APPLVLLINUX32,
+                        # APPLVLLINUX64,
+                        # APPLVLWIN32,
 
                         LIBPYTHON_LINUX32,
                         LIBPYTHON_LINUX64,
@@ -476,12 +484,12 @@ BuildmasterConfig = {
                         JITAARCH64,
                         JITMACOS64,
                         JITMACOSARM64,
-                        JITWIN32,
+                        # JITWIN32,
                         #JITFREEBSD964,
 
-                        JITONLYLINUXPPC64,
-                        NUMPY_64,
-                        NUMPY_WIN,
+                        # JITONLYLINUXPPC64,
+                        # NUMPY_64,
+                        # NUMPY_WIN,
                         WIN64OWN,
                         MACOS64OWN,
                         MACOSARM64OWN,
@@ -490,9 +498,9 @@ BuildmasterConfig = {
                         #JITFREEBSD764,
                         #JITFREEBSD864,
 
-                        LINUX_S390XOWN,
-                        LINUX_S390XRPYTHON,
-                        JITLINUX_S390X,
+                        # LINUX_S390XOWN,
+                        # LINUX_S390XRPYTHON,
+                        # JITLINUX_S390X,
 
             ]), #  + ARM.builderNames, properties=[]),
     ], # + ARM.schedulers,
@@ -576,38 +584,38 @@ BuildmasterConfig = {
                    "category": 'aarch64',
                    "locks": [AARCH64Lock.access('counting')],
                   },
-                  {"name": APPLVLLINUX32,
-                   #"slavenames": ["allegro32"],
-                   "slavenames": ["benchmarker32"],
-                   "builddir": APPLVLLINUX32,
-                   "factory": pypyTranslatedAppLevelTestFactory,
-                   'category': 'linux32',
-                   "locks": [BenchmarkerLock.access('counting')],
-                  },
-                  {"name": APPLVLLINUX64,
-                   #"slavenames": ["bencher4", "speed-old"],
-                   "slavenames": ["bencher4"],
-                   "builddir": APPLVLLINUX64,
-                   "factory": pypyTranslatedAppLevelTestFactory64,
-                   "category": "linux64",
-                   "locks": [Bencher4Lock.access('counting')],
-                  },
-                  {"name": LIBPYTHON_LINUX32,
-                   "slavenames": ["bencher4_32"],
-                   #"slavenames": ["allegro32"],
-                   "builddir": LIBPYTHON_LINUX32,
-                   "factory": pypyTranslatedLibPythonTestFactory,
-                   'category': 'linux32',
-                   "locks": [BenchmarkerLock.access('counting')],
-                  },
-                  {"name": LIBPYTHON_LINUX64,
-                   #"slavenames": ["bencher4", "speed-old"],
-                   "slavenames": ["bencher4"],
-                   "builddir": LIBPYTHON_LINUX64,
-                   "factory": pypyTranslatedLibPythonTestFactory,
-                   "category": "linux64",
-                   "locks": [Bencher4Lock.access('counting')],
-                  },
+                  # {"name": APPLVLLINUX32,
+                  #  #"slavenames": ["allegro32"],
+                  #  "slavenames": ["benchmarker32"],
+                  #  "builddir": APPLVLLINUX32,
+                  #  "factory": pypyTranslatedAppLevelTestFactory,
+                  #  'category': 'linux32',
+                  #  "locks": [BenchmarkerLock.access('counting')],
+                  # },
+                  # {"name": APPLVLLINUX64,
+                  #  #"slavenames": ["bencher4", "speed-old"],
+                  #  "slavenames": ["bencher4"],
+                  #  "builddir": APPLVLLINUX64,
+                  #  "factory": pypyTranslatedAppLevelTestFactory64,
+                  #  "category": "linux64",
+                  #  "locks": [Bencher4Lock.access('counting')],
+                  # },
+                  # {"name": LIBPYTHON_LINUX32,
+                  #  "slavenames": ["bencher4_32"],
+                  #  #"slavenames": ["allegro32"],
+                  #  "builddir": LIBPYTHON_LINUX32,
+                  #  "factory": pypyTranslatedLibPythonTestFactory,
+                  #  'category': 'linux32',
+                  #  "locks": [BenchmarkerLock.access('counting')],
+                  # },
+                  # {"name": LIBPYTHON_LINUX64,
+                  #  #"slavenames": ["bencher4", "speed-old"],
+                  #  "slavenames": ["bencher4"],
+                  #  "builddir": LIBPYTHON_LINUX64,
+                  #  "factory": pypyTranslatedLibPythonTestFactory,
+                  #  "category": "linux64",
+                  #  "locks": [Bencher4Lock.access('counting')],
+                  # },
                   {"name" : JITLINUX32,
                    #"slavenames": ["allegro32"],
                    "slavenames": ["bencher4_32", "salsa_32", "benchmarker32"],
@@ -663,34 +671,34 @@ BuildmasterConfig = {
                    },
 
                   # Windows
-                  {"name": WIN32OWN,
-                   "slavenames": ["SalsaSalsa"],
-                   "builddir": WIN32OWN,
-                   "factory": pypyOwnTestFactoryWin,
-                   "locks": [WinSlaveLock.access('counting')],
-                   "category": 'win32',
-                  },
-                  {"name": WIN32RPYTHON,
-                   "slavenames": ["SalsaSalsa"],
-                   "builddir": WIN32RPYTHON,
-                   "factory": pypyRPythonTestFactoryWin,
-                   "locks": [WinSlaveLock.access('counting')],
-                   "category": 'win32',
-                  },
-                 {"name": APPLVLWIN32,
-                   "slavenames": ["SalsaSalsa", ],
-                   "builddir": APPLVLWIN32,
-                   "factory": pypyTranslatedAppLevelTestFactoryWin,
-                   "locks": [WinSlaveLock.access('counting')],
-                   "category": "win32",
-                  },
-                  {"name" : JITWIN32,
-                   "slavenames": ["SalsaSalsa"],
-                   'builddir' : JITWIN32,
-                   'factory' : pypyJITTranslatedTestFactoryWin,
-                   "locks": [WinSlaveLock.access('counting')],
-                   'category' : 'win32',
-                   },
+                 #  {"name": WIN32OWN,
+                 #   "slavenames": ["SalsaSalsa"],
+                 #   "builddir": WIN32OWN,
+                 #   "factory": pypyOwnTestFactoryWin,
+                 #   "locks": [WinSlaveLock.access('counting')],
+                 #   "category": 'win32',
+                 #  },
+                 #  {"name": WIN32RPYTHON,
+                 #   "slavenames": ["SalsaSalsa"],
+                 #   "builddir": WIN32RPYTHON,
+                 #   "factory": pypyRPythonTestFactoryWin,
+                 #   "locks": [WinSlaveLock.access('counting')],
+                 #   "category": 'win32',
+                 #  },
+                 # {"name": APPLVLWIN32,
+                 #   "slavenames": ["SalsaSalsa", ],
+                 #   "builddir": APPLVLWIN32,
+                 #   "factory": pypyTranslatedAppLevelTestFactoryWin,
+                 #   "locks": [WinSlaveLock.access('counting')],
+                 #   "category": "win32",
+                 #  },
+                 #  {"name" : JITWIN32,
+                 #   "slavenames": ["SalsaSalsa"],
+                 #   'builddir' : JITWIN32,
+                 #   'factory' : pypyJITTranslatedTestFactoryWin,
+                 #   "locks": [WinSlaveLock.access('counting')],
+                 #   'category' : 'win32',
+                 #   },
                   {"name": WIN64OWN,
                    "slavenames": ["SalsaSalsa64"],
                    "builddir": WIN64OWN,
@@ -714,53 +722,53 @@ BuildmasterConfig = {
                    },
 
                  # PPC
-                  {"name": JITONLYLINUXPPC64,
-                   "slavenames": ['gcc1'],
-                   "builddir": JITONLYLINUXPPC64,
-                   "factory": pypyJitOnlyOwnTestFactory,
-                   "category": 'linux-ppc64',
-                   },
-                  {'name': NUMPY_64,
-                   'slavenames': ["bencher4", "benchmarker64"],
-                   'builddir': NUMPY_64,
-                   'factory': pypyNumpyCompatability,
-                   'category': 'numpy',
-                   'locks': [BenchmarkerLock.access('counting')],
-                   "locks": [Bencher4Lock.access('counting')],
-                  },
-                  {'name': NUMPY_WIN,
-                   'slavenames': ["SalsaSalsa"],
-                   'builddir': NUMPY_WIN,
-                   'factory': pypyNumpyCompatabilityWin,
-                   "locks": [WinSlaveLock.access('counting')],
-                   'category': 'numpy',
-                  },
-                  {'name': PYPYBUILDBOT,
-                   'slavenames': ['cobra'],
-                   'builddir': PYPYBUILDBOT,
-                   'factory': pypybuilds.PyPyBuildbotTestFactory(),
-                   'category': 'buildbot',
-                   "locks": [Bencher4Lock.access('counting')],
-                  },
+                 #  {"name": JITONLYLINUXPPC64,
+                 #   "slavenames": ['gcc1'],
+                 #   "builddir": JITONLYLINUXPPC64,
+                 #   "factory": pypyJitOnlyOwnTestFactory,
+                 #   "category": 'linux-ppc64',
+                 #   },
+                  # {'name': NUMPY_64,
+                  #  'slavenames': ["bencher4", "benchmarker64"],
+                  #  'builddir': NUMPY_64,
+                  #  'factory': pypyNumpyCompatability,
+                  #  'category': 'numpy',
+                  #  'locks': [BenchmarkerLock.access('counting')],
+                  #  "locks": [Bencher4Lock.access('counting')],
+                  # },
+                  # {'name': NUMPY_WIN,
+                  #  'slavenames': ["SalsaSalsa"],
+                  #  'builddir': NUMPY_WIN,
+                  #  'factory': pypyNumpyCompatabilityWin,
+                  #  "locks": [WinSlaveLock.access('counting')],
+                  #  'category': 'numpy',
+                  # },
+                  # {'name': PYPYBUILDBOT,
+                  #  'slavenames': ['cobra'],
+                  #  'builddir': PYPYBUILDBOT,
+                  #  'factory': pypybuilds.PyPyBuildbotTestFactory(),
+                  #  'category': 'buildbot',
+                  #  "locks": [Bencher4Lock.access('counting')],
+                  # },
                   # S390X
-                  {"name": LINUX_S390XOWN,
-                   "slavenames": ["s390x-slave"],
-                   "builddir": LINUX_S390XOWN,
-                   "factory": pypyOwnTestFactory,
-                   "category": 'linux-s390x',
-                  },
-                  {"name": LINUX_S390XRPYTHON,
-                   "slavenames": ["s390x-slave"],
-                   "builddir": LINUX_S390XRPYTHON,
-                   "factory": pypyRPythonTestFactory,
-                   "category": 'linux-s390x',
-                  },
-                  {'name': JITLINUX_S390X,
-                   'slavenames': ['s390x-slave'],
-                   'builddir': JITLINUX_S390X,
-                   'factory': pypyJITTranslatedTestFactoryS390X,
-                   'category': 'linux-s390x',
-                  },
+                  # {"name": LINUX_S390XOWN,
+                  #  "slavenames": ["s390x-slave"],
+                  #  "builddir": LINUX_S390XOWN,
+                  #  "factory": pypyOwnTestFactory,
+                  #  "category": 'linux-s390x',
+                  # },
+                  # {"name": LINUX_S390XRPYTHON,
+                  #  "slavenames": ["s390x-slave"],
+                  #  "builddir": LINUX_S390XRPYTHON,
+                  #  "factory": pypyRPythonTestFactory,
+                  #  "category": 'linux-s390x',
+                  # },
+                  # {'name': JITLINUX_S390X,
+                  #  'slavenames': ['s390x-slave'],
+                  #  'builddir': JITLINUX_S390X,
+                  #  'factory': pypyJITTranslatedTestFactoryS390X,
+                  #  'category': 'linux-s390x',
+                  # },
                 ], # + ARM.builders,
 
     # http://readthedocs.org/docs/buildbot/en/latest/tour.html#debugging-with-manhole
