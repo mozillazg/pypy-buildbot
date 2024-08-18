@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xeo pipefail
 
-OPENSSL_URL="https://www.openssl.org/source/"
+OPENSSL_URL="https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1s/"
 OPENSSL_NAME="openssl-1.1.1s"
 OPENSSL_SHA256="c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa"
 
@@ -15,7 +15,7 @@ function check_sha256sum {
 
 echo args are $1 $2
 
-curl -sS -#O "${OPENSSL_URL}/${OPENSSL_NAME}.tar.gz"
+curl -sSL -#O "${OPENSSL_URL}/${OPENSSL_NAME}.tar.gz"
 check_sha256sum ${OPENSSL_NAME}.tar.gz ${OPENSSL_SHA256}
 tar zxf ${OPENSSL_NAME}.tar.gz
 PATH=/opt/perl/bin:$PATH
