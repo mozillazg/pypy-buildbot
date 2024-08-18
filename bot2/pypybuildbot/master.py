@@ -476,8 +476,8 @@ BuildmasterConfig = {
                         # APPLVLLINUX64,
                         # APPLVLWIN32,
 
-                        LIBPYTHON_LINUX32,
-                        LIBPYTHON_LINUX64,
+                        #LIBPYTHON_LINUX32,
+                        #LIBPYTHON_LINUX64,
 
                         JITLINUX32,
                         JITLINUX64,
@@ -765,7 +765,7 @@ BuildmasterConfig = {
                   # },
                   # {'name': JITLINUX_S390X,
                   #  'slavenames': ['s390x-slave'],
-                  #  'builddir': JITLINUX_S390X,
+                  #  'builddir': JITLINUX_S390X ,
                   #  'factory': pypyJITTranslatedTestFactoryS390X,
                   #  'category': 'linux-s390x',
                   # },
