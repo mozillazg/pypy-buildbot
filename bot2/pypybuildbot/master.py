@@ -338,7 +338,7 @@ BuildmasterConfig = {
         # in the "Revision" property.  Any build with such a "Revision" property will
         # use exactly that revision (at least in our nightly builds).
         GitPoller('https://github.com/pypy/pypy', workdir='gitpoller-workdir',
-                 branches=['main','py3.9', 'py3.10'], pollinterval=20*60),
+                 branches=['main','py3.10'], pollinterval=20*60),
         ],
 
     'schedulers': [
@@ -392,14 +392,6 @@ BuildmasterConfig = {
             onlyIfChanged=True,
         ),
 
-        Nightly("nightly-1-02", [
-            JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
-            #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
-
-            ], branch='py3.9', hour=11, minute=0,
-            onlyIfChanged=True,
-        ),
-
         Nightly("nightly-1-03", [
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
@@ -432,24 +424,6 @@ BuildmasterConfig = {
             # JITLINUX_S390X,
             ], branch="py3.10", hour=1, minute=30,
             onlyIfChanged=True
-        ),
-
-        Nightly("nightly-4-30-py3.9", [
-            LINUX32OWN,                # on bencher4_32, uses all cores
-            JITLINUX32,                # on bencher4_32, uses 1 core
-            LINUX64OWN,                # on bencher4, uses all cores
-            AARCH64OWN,
-            JITLINUX64,                # on bencher4, uses 1 core
-            JITAARCH64,
-            JITMACOS64,
-            JITMACOSARM64,
-            WIN64OWN,                  # on SalsaSalsa
-            MACOS64OWN,
-            MACOSARM64OWN,
-            JITWIN64,                  # on SalsaSalsa
-            # JITLINUX_S390X,
-            ], branch="py3.9", hour=3, minute=30,
-            onlyIfChanged=True 
         ),
 
         BenchmarkForceScheduler('Force Build ',

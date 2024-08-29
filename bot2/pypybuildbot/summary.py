@@ -806,9 +806,9 @@ class Summary(HtmlResource):
                 builditer = builderStatus.generateFinishedBuilds(num_builds=5*N)
 
             for build in builditer:
-                if prune_old and self._age(build) > 7:
+                if prune_old and self._age(build) > 14:
                     continue
-                if self._age(build) > 60:   # two months old: prune anyway
+                if self._age(build) > 120:   # four months old: prune anyway
                     continue
                 branch = self._get_branch(status, build)
                 if not test_branch(branch):
