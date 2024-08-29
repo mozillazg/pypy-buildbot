@@ -23,7 +23,7 @@
 # Use PYPY_MAKE_PORTABLE to package a built PyPy in a portable fashion (that
 # is the motivation for doing this in the first place, right?)
 #
-# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
 #     -ePYPY_MAKE_PORTABLE=1 buildslave_x86_64
 #
 # You might want to keep the TMPDIR where the testing/building
@@ -31,12 +31,12 @@
 # to save the files outside the docker
 #
 # mkdir -p build_dir/tmp
-# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
 #     -eTMPDIR=/build_dir/tmp -ePYPY_MAKE_PORTABLE=1 buildslave_x86_64
 #
 # To enter the buildslave image, add a shell command to the end
 #
-# docker run -it -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it -v<abspath/to/builder/dir>:/build_dir \
 #     -eTMPDIR=/build_dir/tmp buildslave_x86_64 /bin/bash
 #
 # This will enter the docker as root. Don't do "su - buildslave",
@@ -45,6 +45,12 @@
 FROM quay.io/pypa/manylinux2014_x86_64:latest
 WORKDIR /root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Centos 7 is EOL and is no longer available from the usual mirrors, so switch
+# to https://vault.centos.org
+RUN sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf
+RUN sed -i 's/^mirrorlist/#mirrorlist/g' /etc/yum.repos.d/*.repo
+RUN sed -i 's;^.*baseurl=http://mirror;baseurl=https://vault;g' /etc/yum.repos.d/*.repo
 
 RUN yum -y update
 RUN yum install -y wget zlib-devel glibc-devel libX11-devel \
@@ -66,17 +72,20 @@ ADD install_ncurses.sh /root/install_ncurses.sh
 RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 # centos6 provides gc7.1, which does not work in a docker. Use a newer version
 # This is for testing only
-Add install_gc.sh /root/install_gc.sh
+ADD install_gc.sh /root/install_gc.sh
 RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
 
-Add install_sqlite.sh /root/install_sqlite.sh
+ADD install_sqlite.sh /root/install_sqlite.sh
 RUN sh /root/install_sqlite.sh 2>&1 | tee /root/install_sqlite.log
 
-Add install_libexpat.sh /root/install_libexpat.sh
+ADD install_libexpat.sh /root/install_libexpat.sh
 RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
 
-Add install_bzip2.sh /root/install_bzip2.sh
+ADD install_bzip2.sh /root/install_bzip2.sh
 RUN sh /root/install_bzip2.sh 2>&1 | tee /root/install_bzip2.log
+
+# Update certificates
+RUN yum reinstall -y ca-certificates wget
 
 RUN yum clean packages
 
