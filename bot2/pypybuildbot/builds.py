@@ -510,7 +510,7 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
         target = Property('target_path')
         venv_dir = Property('venv_dir', default = 'pypy-venv')
         virt_pypy = Property('virt_pypy', default=virt_pypy)
-        extra_test_args = Property('extra_test_args', default=[])
+        extra_test_args = str(Property('extra_test_args', default='')).split(" ")
         # If we already have a bin directory, virtualenv will expect to find
         # the executables there (on linux). So copy them over.
         if platform.startswith('linux') or platform in ('aarch64', 's390x'):
