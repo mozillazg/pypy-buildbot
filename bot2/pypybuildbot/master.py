@@ -355,6 +355,10 @@ BuildmasterConfig = {
             MACOS64OWN,
             MACOSARM64OWN,
             # LINUX_S390XOWN,
+            ], branch='main', hour=0, minute=0,
+            onlyIfChanged=True,
+        ),
+        Nightly("nightly-0-30", [
             JITLINUX32,                # on benchmarker4_32, uses 1 core
             JITLINUX64,                # on bencher4, uses 1 core
             JITAARCH64,
@@ -367,11 +371,10 @@ BuildmasterConfig = {
             JITMACOSARM64,
             # buildbot selftest
             #PYPYBUILDBOT,
-            ], branch='main', hour=0, minute=0,
+            ], branch='main', hour=0, minute=30,
             onlyIfChanged=True,
         ),
-
-        Nightly("nightly-0-01", [
+        Nightly("nightly-0-02", [
             LINUX32RPYTHON,            # on benchermarker_32, uses all cores
             LINUX64RPYTHON,            # on bencher4, uses all cores
             AARCH64RPYTHON,
@@ -379,7 +382,7 @@ BuildmasterConfig = {
             # LINUX_S390XRPYTHON,
             MACOSARM64RPYTHON,
             MACOS64RPYTHON,
-            ], branch='main', hour=1, minute=0, onlyIfChanged=True,
+            ], branch='main', hour=1, minute=30, onlyIfChanged=True,
             fileIsImportant=isRPython,
             change_filter=filter.ChangeFilter(branch='main'),
         ),
