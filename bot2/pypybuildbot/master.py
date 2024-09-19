@@ -391,7 +391,7 @@ BuildmasterConfig = {
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
-            ], branch='main', hour=7, minute=0,
+            ], branch='main', hour=8, minute=0,
             onlyIfChanged=True,
         ),
 
@@ -399,7 +399,7 @@ BuildmasterConfig = {
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
-            ], branch='py3.10', hour=14, minute=0,
+            ], branch='py3.10', hour=12, minute=0,
             onlyIfChanged=True,
         ),
 
@@ -425,7 +425,7 @@ BuildmasterConfig = {
             MACOSARM64OWN,
             JITWIN64,                  # on SalsaSalsa
             # JITLINUX_S390X,
-            ], branch="py3.10", hour=1, minute=30,
+            ], branch="py3.10", hour=4, minute=30,
             onlyIfChanged=True
         ),
 
