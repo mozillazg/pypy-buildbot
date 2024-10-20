@@ -371,7 +371,7 @@ BuildmasterConfig = {
             JITMACOSARM64,
             # buildbot selftest
             #PYPYBUILDBOT,
-            ], branch='main', hour=0, minute=30,
+            ], branch='main', hour=0, minute=00,
             onlyIfChanged=True,
         ),
         Nightly("nightly-0-02", [
@@ -411,21 +411,25 @@ BuildmasterConfig = {
             #NUMPY_WIN,                  # on SalsaSalsa
         ]),
 
-        Nightly("nightly-1-30-py3.10", [
+        Nightly("nightly-own-py3.10", [
             LINUX32OWN,                # on bencher4_32, uses all cores
-            JITLINUX32,                # on bencher4_32, uses 1 core
             LINUX64OWN,                # on bencher4, uses all cores
             AARCH64OWN,
-            JITLINUX64,                # on bencher4, uses 1 core
-            JITAARCH64,
-            JITMACOS64,               # on xerxes
-            JITMACOSARM64,
             WIN64OWN,                  # on SalsaSalsa
             MACOS64OWN,
             MACOSARM64OWN,
+            ], branch="py3.10", hour=3, minute=30,
+            onlyIfChanged=True
+        ),
+        Nightly("nightly-jit-py3.10", [
+            JITLINUX32,                # on bencher4_32, uses 1 core
+            JITLINUX64,                # on bencher4, uses 1 core
+            JITAARCH64,
+            JITMACOS64,
+            JITMACOSARM64,
             JITWIN64,                  # on SalsaSalsa
             # JITLINUX_S390X,
-            ], branch="py3.10", hour=4, minute=30,
+            ], branch="py3.10", hour=5, minute=00,
             onlyIfChanged=True
         ),
 
