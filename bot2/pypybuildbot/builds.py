@@ -484,6 +484,16 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
         haltOnFailure=False,
         ))
 
+    if lib_python:
+        factory.addStep(PytestCmd(
+            description="lib-python test",
+            command=prefix + ["python", "testrunner/lib_python_tests.py"],
+            timeout=4000,
+            logfiles={'pytestLog': 'cpython.log'},
+            env={"TMPDIR": Interpolate('%(prop:target_tmpdir)s' + factory.pytest),
+                 "SETUPTOOLS_USE_DISTUTILS": "stdlib",
+                }))
+
     if app_tests:
         if app_tests is True:
             app_tests = []
@@ -557,16 +567,6 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             logfiles={'pytestLog': 'extra.log'},
             workdir='venv',
         ))
-
-    if lib_python:
-        factory.addStep(PytestCmd(
-            description="lib-python test",
-            command=prefix + ["python", "testrunner/lib_python_tests.py"],
-            timeout=4000,
-            logfiles={'pytestLog': 'cpython.log'},
-            env={"TMPDIR": Interpolate('%(prop:target_tmpdir)s' + factory.pytest),
-                 "SETUPTOOLS_USE_DISTUTILS": "stdlib",
-                }))
 
     if pypyjit:
         factory.addStep(PytestCmd(
