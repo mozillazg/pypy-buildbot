@@ -411,6 +411,28 @@ BuildmasterConfig = {
             #NUMPY_WIN,                  # on SalsaSalsa
         ]),
 
+        Nightly("nightly-own-py3.11", [
+            LINUX32OWN,                # on bencher4_32, uses all cores
+            LINUX64OWN,                # on bencher4, uses all cores
+            AARCH64OWN,
+            WIN64OWN,                  # on SalsaSalsa
+            MACOS64OWN,
+            MACOSARM64OWN,
+            ], branch="py3.11", hour=2, minute=30,
+            onlyIfChanged=True
+        ),
+        Nightly("nightly-jit-py3.11", [
+            JITLINUX32,                # on bencher4_32, uses 1 core
+            JITLINUX64,                # on bencher4, uses 1 core
+            JITAARCH64,
+            JITMACOS64,
+            JITMACOSARM64,
+            JITWIN64,                  # on SalsaSalsa
+            # JITLINUX_S390X,
+            ], branch="py3.11", hour=3, minute=30,
+            onlyIfChanged=True
+        ),
+
         Nightly("nightly-own-py3.10", [
             LINUX32OWN,                # on bencher4_32, uses all cores
             LINUX64OWN,                # on bencher4, uses all cores
@@ -418,7 +440,7 @@ BuildmasterConfig = {
             WIN64OWN,                  # on SalsaSalsa
             MACOS64OWN,
             MACOSARM64OWN,
-            ], branch="py3.10", hour=3, minute=30,
+            ], branch="py3.10", hour=4, minute=30,
             onlyIfChanged=True
         ),
         Nightly("nightly-jit-py3.10", [
@@ -429,7 +451,7 @@ BuildmasterConfig = {
             JITMACOSARM64,
             JITWIN64,                  # on SalsaSalsa
             # JITLINUX_S390X,
-            ], branch="py3.10", hour=5, minute=00,
+            ], branch="py3.10", hour=5, minute=30,
             onlyIfChanged=True
         ),
 
