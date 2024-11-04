@@ -338,7 +338,7 @@ BuildmasterConfig = {
         # in the "Revision" property.  Any build with such a "Revision" property will
         # use exactly that revision (at least in our nightly builds).
         GitPoller('https://github.com/pypy/pypy', workdir='gitpoller-workdir',
-                 branches=['main','py3.10'], pollinterval=20*60),
+                 branches=['main','py3.10', 'py3.11'], pollinterval=20*60),
         ],
 
     'schedulers': [
