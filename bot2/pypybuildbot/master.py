@@ -399,7 +399,7 @@ BuildmasterConfig = {
             JITBENCH64,                # on benchmarker, uses 1 core (in part exclusively)
             #JITBENCH64_NEW,            # on speed64, uses 1 core (in part exclusively)
 
-            ], branch='py3.10', hour=12, minute=0,
+            ], branch='py3.11', hour=12, minute=0,
             onlyIfChanged=True,
         ),
 

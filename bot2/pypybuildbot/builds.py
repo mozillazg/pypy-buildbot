@@ -29,14 +29,14 @@ WinSlaveLock = locks.SlaveLock('win_cpu', maxCount=2)
 # speed-old has 24 cores, but memory for ~2 translations
 #SpeedOldLock = locks.MasterLock('speed_old_lock', maxCount=2)
 # bencher4 has 8 cores, 32 GB RAM
-Bencher4Lock = locks.MasterLock('bencher4_lock', maxCount=4)
+Bencher4Lock = locks.MasterLock('bencher4_lock', maxCount=1)
 AARCH64Lock = locks.MasterLock('aarch64_lock', maxCount=1)
 
 # The cross translation machine can accomodate 2 jobs at the same time
 ARMCrossLock = locks.MasterLock('arm_cpu', maxCount=2)
 # while the boards can only run one job at the same time
 ARMBoardLock = locks.SlaveLock('arm_boards', maxCount=1)
-Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=2)
+Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=1)
 
 map_branch_name = lambda x: 'main' if x in ['', None, 'default'] else x
 
