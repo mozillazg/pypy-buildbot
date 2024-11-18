@@ -5,7 +5,7 @@
 #  -f is this file
 #  1001 is the UID of the user to run as, you might want to use $UID
 #  docker is the directory where install_ffi.sh is
-# docker build -t buildslave_x86_64 --build-arg BUILDSLAVE_UID=1001 -f docker/Dockerfile docker 
+# docker build --pull -t buildslave_x86_64 --build-arg BUILDSLAVE_UID=1001 -f docker/Dockerfile docker 
 #
 # To create the buildslave configuration, call
 # docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \

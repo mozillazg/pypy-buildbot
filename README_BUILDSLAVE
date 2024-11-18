@@ -5,7 +5,7 @@ There are three documented ways to run a PyPy buildslave:
 
 - "bare metal" on the host machine, described below
 - in a chroot, setting up the chroot is described in `README-CHROOT`
-- via docker on a centos6-based image, see docker/Dockerfile
+- via docker on a centos7-based image, see docker/Dockerfile
 
 In all cases the required setup is::
 - hg
@@ -19,7 +19,7 @@ In all cases the required setup is::
   "python_for_buildbot" and run the buildbot with "python_for_buildbot.exe 
   buildslave start"
 - virtualenv that will use the "python" from above
-- pytest, hypothesis, pathlib, cffi for testing
+- pytest, hypothesis, pathlib, cffi pexpect for testing
 - all the build dependencies list here
   http://doc.pypy.org/en/latest/build.html#install-build-time-dependencies
 
@@ -33,11 +33,12 @@ the xz package since it requires a modern SSL.
 On windows, you will need to add `externals/bin` to your PATH before running
 the buildslave.
 
-Then you will need to install the ``buildbot-slave`` package, which will
-install many other packages like twised, so you may prefer to run the
-slave in a virtualenv::
+Then you will need to install the ``buildbot-slave`` package (pinning automat
+for python2), which will install many other packages like twisted, so you may
+prefer to run the slave in a virtualenv::
 
-    pip install buildbot-slave
+    pip install pytest hypothesis==4.42 cffi mercurial==6.1 virtualenv pexpect vmprof
+    pip install buildbot-slave automat==20.2
 
 The next step is to create a buildslave configuration file. Based on version
 0.8.7 of buildbot you need to execute the following command.
