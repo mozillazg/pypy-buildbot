@@ -9,7 +9,7 @@ There are three documented ways to run a PyPy buildslave:
 
 In all cases the required setup is::
 - hg
-- "python" should run a python 2.6-2.7 that will run the test suites.
+- "python" should run a python 2.7 that will run the test suites.
   This should be pypy2.7 on windows to prevent problems with mixing runtimes,
   (cpython is built with an ancient MSVC) but the buildbot itself requires
   pywin32 which is not supported, so you must use cpython on windows to run the

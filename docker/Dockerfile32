@@ -116,6 +116,11 @@ RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
 
+# fix pkg-config tcl/tk stub library use
+# https://github.com/pypa/manylinux/issues/1718
+RUN sed -i -e"s/ -ltclstub8.6//" /usr/local/lib/pkgconfig/tcl.pc
+RUN sed -i -e"s/ -ltkstub8.6//" /usr/local/lib/pkgconfig/tk.pc
+
 # Define a user
 ARG BUILDSLAVE_UID=1001
 ARG PARALLEL_BUILDS=4
