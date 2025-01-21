@@ -66,17 +66,21 @@ ADD install_ncurses.sh /root/install_ncurses.sh
 RUN /root/install_ncurses.sh 2>&1 | tee /root/install_ncurses.log
 # centos6 provides gc7.1, which does not work in a docker. Use a newer version
 # This is for testing only
-Add install_gc.sh /root/install_gc.sh
+ADD install_gc.sh /root/install_gc.sh
 RUN sh /root/install_gc.sh 2>&1 | tee /root/install_gc.log
 
-Add install_sqlite.sh /root/install_sqlite.sh
+ADD install_sqlite.sh /root/install_sqlite.sh
 RUN sh /root/install_sqlite.sh 2>&1 | tee /root/install_sqlite.log
 
-Add install_libexpat.sh /root/install_libexpat.sh
+ADD install_libexpat.sh /root/install_libexpat.sh
 RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
 
-Add install_bzip2.sh /root/install_bzip2.sh
+ADD install_bzip2.sh /root/install_bzip2.sh
 RUN sh /root/install_bzip2.sh 2>&1 | tee /root/install_bzip2.log
+
+ADD install_libunwind.sh /root/install_libunwind.sh
+RUN sh /root/install_libunwind.sh 2>&1 | tee /root/install_libunwind.log
+
 
 RUN yum clean packages
 
