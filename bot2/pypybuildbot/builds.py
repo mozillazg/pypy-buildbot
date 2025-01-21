@@ -29,16 +29,16 @@ WinSlaveLock = locks.SlaveLock('win_cpu', maxCount=2)
 # speed-old has 24 cores, but memory for ~2 translations
 #SpeedOldLock = locks.MasterLock('speed_old_lock', maxCount=2)
 # bencher4 has 8 cores, 32 GB RAM
-Bencher4Lock = locks.MasterLock('bencher4_lock', maxCount=4)
+Bencher4Lock = locks.MasterLock('bencher4_lock', maxCount=1)
 AARCH64Lock = locks.MasterLock('aarch64_lock', maxCount=1)
 
 # The cross translation machine can accomodate 2 jobs at the same time
 ARMCrossLock = locks.MasterLock('arm_cpu', maxCount=2)
 # while the boards can only run one job at the same time
 ARMBoardLock = locks.SlaveLock('arm_boards', maxCount=1)
-Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=2)
+Salsa_m1_lock = locks.SlaveLock('salsa-m1', maxCount=1)
 
-map_branch_name = lambda x: x if x not in ['', None, 'default'] else 'trunk'
+map_branch_name = lambda x: 'main' if x in ['', None, 'default'] else x
 
 class ShellCmd(shell.ShellCommand):
     # our own version that can distinguish abort cases (rc == -1)
@@ -217,7 +217,7 @@ class UpdateGitCheckout(ShellCmd):
             # ignore the branch set by the user.
         else:
             properties = self.build.getProperties()
-            branch = properties['branch'] or 'default'
+            branch = properties['branch'] or 'main'
         command = ["git", "checkout", "-f", branch]
         self.setCommand(command)
         ShellCmd.start(self)
@@ -225,14 +225,19 @@ class UpdateGitCheckout(ShellCmd):
 
 class CheckGotRevision(ShellCmd):
     description = 'got_revision'
-    command = ['hg', 'parents', '--template', 'got_revision:{rev}:{node}']
+    command = "git rev-list --count HEAD && git rev-parse --short=12 HEAD"
 
     def commandComplete(self, cmd):
         if cmd.rc == 0:
             got_revision = cmd.logs['stdio'].getText()
-            got_revision = got_revision.split('got_revision:')[-1]
+            got_revision = got_revision.replace("\n",":")
+            # Prefix the revisions with 1 since the move to git so sorting
+            # on the summary page still works
+            got_revision = "1" + got_revision
             # manually get the effect of {node|short} without using a
             # '|' in the command-line, because it doesn't work on Windows
+            #
+            # This is a noop since the move to git
             num = got_revision.find(':')
             if num > 0:
                 got_revision = got_revision[:num + 13]
@@ -380,7 +385,7 @@ def update_hg(platform, factory, repourl, workdir, revision, use_branch,
                 workdir=workdir,
                 logEnviron=False))
 
-def update_git(platform, factory, repourl, workdir, branch='master',
+def update_git(platform, factory, repourl, workdir, branch='main',
                alwaysUseLatest=False):
     factory.addStep(
             Git(
@@ -390,11 +395,12 @@ def update_git(platform, factory, repourl, workdir, branch='master',
                 workdir=workdir,
                 branch=branch,
                 alwaysUseLatest=alwaysUseLatest,
+                timeout=40*60,
                 logEnviron=False))
 
 
 def setup_steps(platform, factory, workdir=None,
-                repourl='https://foss.heptapod.net/pypy/pypy/',
+                repourl='https://github.com/pypy/pypy/',
                 force_branch=None):
     factory.addStep(shell.SetPropertyFromCommand(
             command=['python', '-c', "import tempfile, os ;print"
@@ -417,8 +423,9 @@ def setup_steps(platform, factory, workdir=None,
                                   doStepIf=ParseRevision.doStepIf))
     #
     revision=WithProperties("%(revision)s")
-    update_hg(platform, factory, repourl, workdir, revision, use_branch=True,
-              force_branch=force_branch, wipe_bookmarks=True)
+    # update_hg(platform, factory, repourl, workdir, revision, use_branch=True,
+    #          force_branch=force_branch, wipe_bookmarks=True)
+    update_git(platform, factory, repourl, workdir, branch=force_branch)
     #
     factory.addStep(CheckGotRevision(workdir=workdir))
 
@@ -477,6 +484,16 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
         haltOnFailure=False,
         ))
 
+    if lib_python:
+        factory.addStep(PytestCmd(
+            description="lib-python test",
+            command=prefix + ["python", "testrunner/lib_python_tests.py"],
+            timeout=4000,
+            logfiles={'pytestLog': 'cpython.log'},
+            env={"TMPDIR": Interpolate('%(prop:target_tmpdir)s' + factory.pytest),
+                 "SETUPTOOLS_USE_DISTUTILS": "stdlib",
+                }))
+
     if app_tests:
         if app_tests is True:
             app_tests = []
@@ -503,6 +520,8 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
         target = Property('target_path')
         venv_dir = Property('venv_dir', default = 'pypy-venv')
         virt_pypy = Property('virt_pypy', default=virt_pypy)
+        xdist_arg = Property('xdist_arg', default='')
+        xdist_n = Property('xdist_n', default='')
         # If we already have a bin directory, virtualenv will expect to find
         # the executables there (on linux). So copy them over.
         if platform.startswith('linux') or platform in ('aarch64', 's390x'):
@@ -544,20 +563,10 @@ def add_translated_tests(factory, prefix, platform, app_tests, lib_python, pypyj
             description="Run extra tests",
             command=prefix + [virt_pypy, '-m', 'pytest',
                 '../build/extra_tests', '--junitxml=extra.log',
-                '--durations=20', '-raw'],
+                '--durations=20', '-raw', xdist_arg, xdist_n],
             logfiles={'pytestLog': 'extra.log'},
             workdir='venv',
         ))
-
-    if lib_python:
-        factory.addStep(PytestCmd(
-            description="lib-python test",
-            command=prefix + ["python", "testrunner/lib_python_tests.py"],
-            timeout=4000,
-            logfiles={'pytestLog': 'cpython.log'},
-            env={"TMPDIR": Interpolate('%(prop:target_tmpdir)s' + factory.pytest),
-                 "SETUPTOOLS_USE_DISTUTILS": "stdlib",
-                }))
 
     if pypyjit:
         factory.addStep(PytestCmd(
@@ -968,7 +977,7 @@ class JITBenchmark(factory.BuildFactory):
             branch = props.getProperty('branch')
             if branch == 'None' or branch is None:
                 branch = 'default'
-            command=["python", "runner.py", '--output-filename', 'result.json',
+            command=["python", "-u", "runner.py", '--output-filename', 'result.json',
                      '--changed', target,
                      '--baseline', target,
                      '--args', ',--jit off',

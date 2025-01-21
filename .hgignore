@@ -29,6 +29,7 @@ http.log*
 *-macosx-x86-32
 *-macosx-x86-64
 *-macos-arm64
+*-macosx-arm64
 *-macos-x86-64
 *-maemo
 *-maemo-build
@@ -39,7 +40,11 @@ http.log*
 *-win-x86-64
 *-aarch64
 *-s390x
+*-freebsd-8-x86-64
+*-freebsd-9-x86-64
+*-benchmark-linux-x86-64-single-run
 slave/pypy-buildbot
 master/pypy-buildbot
 *.swp
 master/state.sqlite
+gitpoller-workdir/

@@ -674,10 +674,10 @@ def make_subst(v1, v2):
     return subst
 
 # Map certain branch names from SourceStamps to a common name shown on the page
-meta_branch_name = make_subst(['default', '', None], '<trunk>')
-# map the meta-branch <trunk> to the actual branch entries from the
+meta_branch_name = make_subst(['default', '', None], 'main')
+# map the meta-branch main to the actual branch entries from the
 # SourceStamp
-default_value = make_subst('<trunk>', ['default', '', None])
+default_value = make_subst('main', ['main', '', None, 'default'])
 category_name = make_subst(None, '-')
 nocat_value = make_subst("-", None)
 
@@ -806,9 +806,9 @@ class Summary(HtmlResource):
                 builditer = builderStatus.generateFinishedBuilds(num_builds=5*N)
 
             for build in builditer:
-                if prune_old and self._age(build) > 7:
+                if prune_old and self._age(build) > 14:
                     continue
-                if self._age(build) > 60:   # two months old: prune anyway
+                if self._age(build) > 120:   # four months old: prune anyway
                     continue
                 branch = self._get_branch(status, build)
                 if not test_branch(branch):
@@ -817,8 +817,9 @@ class Summary(HtmlResource):
                 if not test_rev(got_rev):
                     continue
 
-                branch = meta_branch_name(branch)
-                cat_branch = (builderStatus.category, branch)
+                branch_ = meta_branch_name(branch)
+                print("mapped branch", branch, "to", branch_)
+                cat_branch = (builderStatus.category, branch_)
 
                 runs, no_revision_builds = cat_branches.setdefault(cat_branch,
                                                                ({}, []))
@@ -934,8 +935,8 @@ class Summary(HtmlResource):
             default_vs_any_text = "filter nothing"
             default_vs_any_query = ""
         else:
-            default_vs_any_text = "all <trunk>"
-            default_vs_any_query = "?branch=<trunk>"
+            default_vs_any_text = "all main"
+            default_vs_any_query = "?branch=main"
 
         default_vs_any_anchor = html.a(default_vs_any_text,
                                      href="/summary%s" %

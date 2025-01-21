@@ -5,7 +5,7 @@
 #  -f is this file
 #  1001 is the UID of the user to run as, you might want to use $UID
 #  docker is the directory where install_ffi.sh is
-# docker build -t buildslave_x86_64 --build-arg BUILDSLAVE_UID=1001 -f docker/Dockerfile docker 
+# docker build --pull -t buildslave_x86_64 --build-arg BUILDSLAVE_UID=1001 -f docker/Dockerfile docker 
 #
 # To create the buildslave configuration, call
 # docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
@@ -23,7 +23,7 @@
 # Use PYPY_MAKE_PORTABLE to package a built PyPy in a portable fashion (that
 # is the motivation for doing this in the first place, right?)
 #
-# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
 #     -ePYPY_MAKE_PORTABLE=1 buildslave_x86_64
 #
 # You might want to keep the TMPDIR where the testing/building
@@ -31,12 +31,12 @@
 # to save the files outside the docker
 #
 # mkdir -p build_dir/tmp
-# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it --rm -v<abspath/to/builder/dir>:/build_dir \
 #     -eTMPDIR=/build_dir/tmp -ePYPY_MAKE_PORTABLE=1 buildslave_x86_64
 #
 # To enter the buildslave image, add a shell command to the end
 #
-# docker run -it -v<abspath/to/builder/dir>:/build_dir> \
+# docker run -it -v<abspath/to/builder/dir>:/build_dir \
 #     -eTMPDIR=/build_dir/tmp buildslave_x86_64 /bin/bash
 #
 # This will enter the docker as root. Don't do "su - buildslave",
@@ -45,6 +45,12 @@
 FROM quay.io/pypa/manylinux2014_x86_64:latest
 WORKDIR /root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Centos 7 is EOL and is no longer available from the usual mirrors, so switch
+# to https://vault.centos.org
+RUN sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf
+RUN sed -i 's/^mirrorlist/#mirrorlist/g' /etc/yum.repos.d/*.repo
+RUN sed -i 's;^.*baseurl=http://mirror;baseurl=https://vault;g' /etc/yum.repos.d/*.repo
 
 RUN yum -y update
 RUN yum install -y wget zlib-devel glibc-devel libX11-devel \
@@ -82,6 +88,9 @@ ADD install_libunwind.sh /root/install_libunwind.sh
 RUN sh /root/install_libunwind.sh 2>&1 | tee /root/install_libunwind.log
 
 
+# Update certificates
+RUN yum reinstall -y ca-certificates wget
+
 RUN yum clean packages
 
 # prefer our libraries in /usr/local/lib
@@ -108,11 +117,16 @@ RUN pip install buildbot-slave pytest hypothesis==4.42 cffi mercurial==6.1 virtu
 # RUN pip install git+https://github.com/vmprof/vmprof-python.git
 
 # get a pypy for translation.
-RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.10-linux64.tar.bz2 -O - | tar -C /opt -xj
-RUN ln -s /opt/pypy2.7-v7.3.10-linux64/bin/pypy /usr/local/bin/pypy
+RUN wget -q --no-check-certificate https://downloads.python.org/pypy/pypy2.7-v7.3.17-linux64.tar.bz2 -O - | tar -C /opt -xj
+RUN ln -s /opt/pypy2.7-v7.3.17-linux64/bin/pypy /usr/local/bin/pypy
 RUN pypy -mensurepip
 RUN pypy -mpip install --upgrade pip==20.3.4
 RUN pypy -mpip install --upgrade setuptools wheel
+
+# fix pkg-config tcl/tk stub library use
+# https://github.com/pypa/manylinux/issues/1718
+RUN sed -i -e"s/ -ltclstub8.6//" /usr/local/lib/pkgconfig/tcl.pc
+RUN sed -i -e"s/ -ltkstub8.6//" /usr/local/lib/pkgconfig/tk.pc
 
 # Define a user
 ARG BUILDSLAVE_UID=1001
