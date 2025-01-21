@@ -84,6 +84,9 @@ RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
 ADD install_bzip2.sh /root/install_bzip2.sh
 RUN sh /root/install_bzip2.sh 2>&1 | tee /root/install_bzip2.log
 
+ADD install_libunwind.sh /root/install_libunwind.sh
+RUN sh /root/install_libunwind.sh 2>&1 | tee /root/install_libunwind.log
+
 RUN yum clean packages
 
 # prefer our libraries in /usr/local/lib
