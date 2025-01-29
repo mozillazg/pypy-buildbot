@@ -55,7 +55,7 @@ RUN sed -i 's;^.*baseurl=http://mirror;baseurl=https://vault;g' /etc/yum.repos.d
 RUN yum -y update
 RUN yum install -y wget zlib-devel glibc-devel libX11-devel \
    libXt-devel patch libXft-devel tk-devel gdbm-devel gdb vim \
-   perl python-virtualenv libffi-devel libunwind-devel openssl-devel \
+   perl python-virtualenv texinfo \
    xz-devel
 RUN yum -y install perl-IPC-Cmd perl-Digest-SHA  # for OpenSSL3
 
@@ -83,6 +83,9 @@ RUN sh /root/install_libexpat.sh 2>&1 | tee /root/install_libexpat.log
 
 ADD install_bzip2.sh /root/install_bzip2.sh
 RUN sh /root/install_bzip2.sh 2>&1 | tee /root/install_bzip2.log
+
+ADD install_libffi.sh /root/install_libffi.sh
+RUN sh /root/install_libffi.sh 2>&1 | tee /root/install_libffi.log
 
 ADD install_libunwind.sh /root/install_libunwind.sh
 RUN sh /root/install_libunwind.sh 2>&1 | tee /root/install_libunwind.log

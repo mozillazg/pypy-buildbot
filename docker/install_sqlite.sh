@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeo pipefail
 
-SQLITE_SHA3=7ee8f02b21edb4489df5082b5cf5b7ef47bcebcdb0e209bf14240db69633c878
-SQLITE_VERSION="3400000"
+SQLITE_SHA3=52cd4a2304b627abbabe1a438ba853d0f6edb8e2774fcb5773c7af11077afe94
+SQLITE_VERSION="3470200"
 
 function check_sha3 {
     local fname=$1
@@ -14,7 +14,7 @@ function check_sha3 {
     fi
 }
 
-curl -sS -#O "https://sqlite.org/2022/sqlite-autoconf-${SQLITE_VERSION}.tar.gz"
+curl -sS -#O "https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz"
 check_sha3 "sqlite-autoconf-${SQLITE_VERSION}.tar.gz" ${SQLITE_SHA3}
 tar zxf sqlite*.tar.gz
 pushd sqlite*

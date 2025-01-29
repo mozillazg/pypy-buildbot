@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeo pipefail
 
-LIBFFI_SHA256="d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676"
-LIBFFI_VERSION="3.4.4"
+LIBFFI_SHA256="9ac790464c1eb2f5ab5809e978a1683e9393131aede72d1b0a0703771d3c6cda"
+LIBFFI_VERSION="3.4.6"
 
 function check_sha256sum {
     local fname=$1
@@ -17,14 +17,12 @@ check_sha256sum "libffi_${LIBFFI_VERSION}.orig.tar.gz" ${LIBFFI_SHA256}
 tar zxf libffi*.orig.tar.gz
 PATH=/opt/perl/bin:$PATH
 pushd libffi*
-if [ "$1" == "manylinux1" ]; then
-  STACK_PROTECTOR_FLAGS="-fstack-protector --param=ssp-buffer-size=4"
-else
-  STACK_PROTECTOR_FLAGS="-fstack-protector-strong"
-fi
+STACK_PROTECTOR_FLAGS="-fstack-protector-strong"
 if [ "$2" == "m32" ]; then
+  setarch i686 ./autogen.sh
   setarch i386 ./configure --prefix=/usr/local CFLAGS="-m32 -g -O2 $STACK_PROTECTOR_FLAGS -Wformat -Werror=format-security"
 else
+  ./autogen.sh
   ./configure --prefix=/usr/local CFLAGS="-g -O2 $STACK_PROTECTOR_FLAGS -Wformat -Werror=format-security"
 fi
 make install

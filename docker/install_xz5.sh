@@ -1,6 +1,6 @@
 #!/bin/bash
 set -xe pipefail
-XZ5_FILE=xz-5.2.5.tar.gz
+XZ5_FILE=xz-5.6.3.tar.gz
 
 wget -q "https://tukaani.org/xz/${XZ5_FILE}"
 gpg --import lasse_collin_pubkey.txt
