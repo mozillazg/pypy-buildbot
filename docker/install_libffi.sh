@@ -23,7 +23,7 @@ if [ "$2" == "m32" ]; then
   setarch i386 ./configure --prefix=/usr/local CFLAGS="-m32 -g -O2 $STACK_PROTECTOR_FLAGS -Wformat -Werror=format-security"
 else
   ./autogen.sh
-  ./configure --prefix=/usr/local CFLAGS="-g -O2 $STACK_PROTECTOR_FLAGS -Wformat -Werror=format-security"
+  ./configure --prefix=/usr/local CFLAGS="-g -O2 $STACK_PROTECTOR_FLAGS -fPIC -Wformat -Werror=format-security"
 fi
 make install
 popd
